@@ -1,9 +1,14 @@
 """
-下载页爬虫 - Stage 3 & 4: 获取下载链接（修复防盗链）
+下载页爬虫 - 修复版（正确处理Tengine CDN防盗链）
+
+关键修复：
+1. 使用HTTPClient的Session保持cookies
+2. 正确设置Referer（必须是ipoipo.cn域名）
+3. 先访问下载页面建立会话，再下载文件
 """
 import re
 import time
-from typing import Optional, Dict
+from typing import Optional, Dict, Tuple
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 from utils.logger import get_logger
@@ -15,7 +20,19 @@ logger = get_logger(__name__)
 
 
 class DownloadScraper:
-    """下载页爬虫"""
+    """
+    下载页爬虫 - 处理防盗链
+    
+    Tengine CDN 防盗链机制:
+    - 使用Referer ACL白名单
+    - 只允许来自 ipoipo.cn 域名的Referer
+    - 直接请求ZIP URL会返回403
+    
+    解决方案:
+    - 使用同一个Session保持cookies
+    - 先访问下载页面（获取cookies）
+    - 下载时设置Referer为下载页面URL
+    """
     
     def __init__(self, http_client: HTTPClient, database: Database):
         self.client = http_client
@@ -26,23 +43,28 @@ class DownloadScraper:
         return DOWNLOAD_URL.format(post_id)
     
     def extract_zip_url(self, html: str, base_url: str = None) -> Optional[str]:
-        """从HTML中提取ZIP下载链接"""
+        """
+        从HTML中提取ZIP下载链接
+        
+        支持多种匹配方式以提高成功率
+        """
         try:
             soup = BeautifulSoup(html, 'lxml')
             
-            # 方法1: 查找包含.zip的链接
+            # 方法1: 查找href包含.zip的链接
             zip_links = soup.find_all('a', href=re.compile(r'\.zip$', re.I))
             if zip_links:
                 url = zip_links[0].get('href')
+                logger.debug(f"✅ 找到ZIP链接 (方法1-href匹配): {url}")
                 return urljoin(base_url, url) if base_url else url
             
-            # 方法2: 查找特定样式的链接（根据你提供的HTML结构）
-            # <a style="font-size: 12px; color: rgb(0, 102, 204);" href="...">xxx.zip</a>
+            # 方法2: 查找特定样式的链接
             links = soup.find_all('a', style=re.compile(r'font-size.*color'))
             for link in links:
                 href = link.get('href', '')
                 text = link.get_text(strip=True)
                 if '.zip' in href.lower() or '.zip' in text.lower():
+                    logger.debug(f"✅ 找到ZIP链接 (方法2-样式匹配): {href}")
                     return urljoin(base_url, href) if base_url else href
             
             # 方法3: 查找所有a标签，筛选文本包含.zip的
@@ -52,7 +74,15 @@ class DownloadScraper:
                 if '.zip' in text.lower():
                     href = link.get('href', '')
                     if href:
+                        logger.debug(f"✅ 找到ZIP链接 (方法3-文本匹配): {href}")
                         return urljoin(base_url, href) if base_url else href
+            
+            # 方法4: 正则匹配HTML中的ZIP URL
+            zip_pattern = r'https?://[^\s<>"\']+\.zip'
+            matches = re.findall(zip_pattern, html, re.I)
+            if matches:
+                logger.debug(f"✅ 找到ZIP链接 (方法4-正则匹配): {matches[0]}")
+                return matches[0]
             
             logger.warning("⚠️ 未找到ZIP下载链接")
             return None
@@ -61,165 +91,101 @@ class DownloadScraper:
             logger.error(f"❌ 提取ZIP链接失败: {e}")
             return None
     
-    def build_download_headers(self, referer_url: str, zip_url: str) -> Dict[str, str]:
+    def visit_download_page(self, download_page_url: str) -> Tuple[bool, Optional[str]]:
         """
-        构建绕过防盗链的请求头
+        访问下载页面
         
-        关键点：
-        1. Referer必须是下载页面URL
-        2. 完整的浏览器User-Agent
-        3. 其他浏览器常见请求头
+        这一步非常重要：
+        1. 建立会话，获取必要的cookies
+        2. HTTPClient的Session会自动保存cookies
+        
+        Returns:
+            (success, html_content)
         """
-        # 解析ZIP URL的域名
-        parsed = urlparse(zip_url)
-        origin = f"{parsed.scheme}://{parsed.netloc}"
+        logger.info(f"📄 访问下载页面: {download_page_url}")
         
-        headers = {
-            # 最关键：Referer必须是下载页面
-            'Referer': referer_url,
-            
-            # 浏览器标识
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            
-            # 接受的内容类型
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-            'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-            'Accept-Encoding': 'gzip, deflate, br',
-            
-            # 连接控制
-            'Connection': 'keep-alive',
-            
-            # 缓存控制
-            'Cache-Control': 'max-age=0',
-            
-            # 升级不安全请求
-            'Upgrade-Insecure-Requests': '1',
-            
-            # Sec-Fetch系列（模拟浏览器）
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'same-origin',
-            'Sec-Fetch-User': '?1',
-            
-            # 浏览器特征
-            'sec-ch-ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"macOS"',
-        }
-        
-        return headers
-    
-    def download_zip_file(self, zip_url: str, referer_url: str, 
-                         save_path: str, chunk_size: int = 8192) -> bool:
-        """
-        下载ZIP文件（绕过防盗链）
-        
-        Args:
-            zip_url: ZIP文件URL
-            referer_url: 来源页面URL（用于Referer）
-            save_path: 保存路径
-            chunk_size: 分块下载大小
-        """
         try:
-            # 构建请求头
-            headers = self.build_download_headers(referer_url, zip_url)
-            
-            logger.info(f"📥 开始下载: {zip_url}")
-            logger.debug(f"🔑 Referer: {referer_url}")
-            
-            # 发送请求（使用stream=True支持大文件）
             response = self.client.get(
-                zip_url, 
-                headers=headers,
-                stream=True,
-                timeout=300  # 5分钟超时
+                download_page_url,
+                timeout=30
             )
             
-            # 检查响应
-            if response.status_code == 403:
-                logger.error(f"❌ 403 Forbidden - 防盗链拦截")
-                logger.error(f"   可能原因：")
-                logger.error(f"   1. Referer不正确: {referer_url}")
-                logger.error(f"   2. 需要Cookie验证")
-                logger.error(f"   3. 需要先访问下载页面")
-                return False
+            # 打印获取到的cookies（调试用）
+            cookies = self.client.get_cookies()
+            if cookies:
+                logger.debug(f"🍪 获取到的Cookies: {list(cookies.keys())}")
             
-            response.raise_for_status()
-            
-            # 获取文件大小
-            total_size = int(response.headers.get('content-length', 0))
-            
-            # 分块下载
-            downloaded = 0
-            with open(save_path, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=chunk_size):
-                    if chunk:
-                        f.write(chunk)
-                        downloaded += len(chunk)
-                        
-                        # 显示进度
-                        if total_size > 0:
-                            progress = (downloaded / total_size) * 100
-                            if downloaded % (chunk_size * 100) == 0:  # 每800KB显示一次
-                                logger.debug(f"   下载进度: {progress:.1f}% ({downloaded}/{total_size})")
-            
-            logger.info(f"✅ 下载完成: {save_path}")
-            return True
+            return True, response.text
             
         except Exception as e:
-            logger.error(f"❌ 下载失败: {e}")
-            import traceback
-            logger.debug(traceback.format_exc())
-            return False
+            logger.error(f"❌ 访问下载页面失败: {e}")
+            return False, None
     
-    def get_zip_download_url(self, post_id: str, visit_page_first: bool = True) -> Optional[str]:
+    def get_zip_download_url(self, post_id: str) -> Tuple[Optional[str], Optional[str]]:
         """
-        Stage 4: 获取ZIP文件的实际下载链接
+        获取ZIP文件的下载链接
         
         Args:
             post_id: 文章ID
-            visit_page_first: 是否先访问页面获取cookie（重要！）
+            
+        Returns:
+            (zip_url, download_page_url) - 同时返回referer用于后续下载
         """
         try:
             # 获取下载页URL
             download_page_url = self.get_download_page_url(post_id)
-            logger.info(f"🔗 下载页: {download_page_url}")
             
-            # 重要：先访问下载页面，建立会话和cookie
-            if visit_page_first:
-                logger.debug("🌐 先访问下载页面（获取cookie）...")
-                # 使用普通的浏览器请求头
-                page_headers = {
-                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                    'Accept-Language': 'zh-CN,zh;q=0.9',
-                }
-                response = self.client.get(download_page_url, headers=page_headers)
-                
-                # 短暂延迟，模拟人类行为
-                time.sleep(1)
-            else:
-                response = self.client.get(download_page_url)
+            # 访问下载页面（建立session，获取cookies）
+            success, html = self.visit_download_page(download_page_url)
+            if not success or not html:
+                return None, None
+            
+            # 模拟人类行为：短暂延迟
+            time.sleep(0.5)
             
             # 提取ZIP链接
-            zip_url = self.extract_zip_url(response.text, base_url=download_page_url)
+            zip_url = self.extract_zip_url(html, base_url=download_page_url)
             
             if zip_url:
                 logger.info(f"✅ 找到ZIP链接: {zip_url}")
                 
-                # 更新数据库，同时保存referer
+                # 更新数据库
                 self.db.update_report_download_url(post_id, zip_url)
-                # 注意：你可能需要在数据库中添加referer_url字段
-                # self.db.update_report_referer(post_id, download_page_url)
                 
-                return zip_url
+                # 返回zip_url和referer（下载页面URL）
+                return zip_url, download_page_url
             else:
                 logger.warning(f"⚠️ 未找到ZIP链接: {post_id}")
-                return None
+                return None, None
                 
         except Exception as e:
             logger.error(f"❌ 获取ZIP链接失败: {post_id} - {e}")
-            return None
+            return None, None
+    
+    def download_zip_file(self, zip_url: str, referer_url: str, 
+                         save_path: str) -> bool:
+        """
+        下载ZIP文件（使用HTTPClient的download_file方法）
+        
+        关键：referer_url 必须是 ipoipo.cn 域名的下载页面URL
+        
+        Args:
+            zip_url: ZIP文件URL (如 https://ipo.ai-tag.cn/2025/04/xxx.zip)
+            referer_url: 来源页面URL (如 https://ipoipo.cn/xiazai/123456/)
+            save_path: 保存路径
+        """
+        logger.info(f"📥 开始下载ZIP文件")
+        logger.info(f"   URL: {zip_url}")
+        logger.info(f"   Referer: {referer_url}")
+        logger.info(f"   保存路径: {save_path}")
+        
+        # 使用HTTPClient的下载方法（会携带Session中的cookies）
+        return self.client.download_file(
+            url=zip_url,
+            save_path=save_path,
+            referer=referer_url,  # 关键：Referer必须是ipoipo.cn域名
+            timeout=300
+        )
     
     def process_report(self, post_id: str, download_file: bool = False, 
                       save_path: str = None) -> Optional[str]:
@@ -230,16 +196,21 @@ class DownloadScraper:
             post_id: 文章ID
             download_file: 是否立即下载文件
             save_path: 文件保存路径
+            
+        Returns:
+            zip_url 或 None
         """
-        # 获取下载链接
-        zip_url = self.get_zip_download_url(post_id, visit_page_first=True)
+        # 获取下载链接（同时会访问下载页面建立session）
+        zip_url, download_page_url = self.get_zip_download_url(post_id)
         
         if not zip_url:
             return None
         
         # 如果需要下载文件
         if download_file and save_path:
-            download_page_url = self.get_download_page_url(post_id)
+            # 短暂延迟，模拟人类行为
+            time.sleep(1)
+            
             success = self.download_zip_file(zip_url, download_page_url, save_path)
             
             if not success:
@@ -248,7 +219,7 @@ class DownloadScraper:
         return zip_url
     
     def process_all_pending_reports(self, limit: int = 100):
-        """处理所有待下载的报告"""
+        """处理所有待获取下载链接的报告"""
         logger.info("=" * 60)
         logger.info("🔗 Stage 3 & 4: 获取所有报告的下载链接")
         logger.info("=" * 60)
@@ -265,7 +236,7 @@ class DownloadScraper:
             
             logger.info(f"\n[{i}/{len(reports)}] {title}")
             
-            zip_url = self.process_report(post_id)
+            zip_url, _ = self.get_zip_download_url(post_id)
             
             if zip_url:
                 success_count += 1
@@ -284,7 +255,7 @@ class DownloadScraper:
         logger.info(f"  - 失败: {fail_count}")
         logger.info(f"{'=' * 60}")
     
-    def test_download_with_referer(self, zip_url: str, referer_url: str):
+    def test_download_with_referer(self, zip_url: str, referer_url: str) -> bool:
         """
         测试：使用Referer下载文件
         用于验证防盗链绕过是否成功
@@ -293,30 +264,44 @@ class DownloadScraper:
         logger.info("🧪 测试下载（带Referer）")
         logger.info("=" * 60)
         
-        headers = self.build_download_headers(referer_url, zip_url)
-        
         logger.info(f"ZIP URL: {zip_url}")
         logger.info(f"Referer: {referer_url}")
-        logger.info(f"\n请求头:")
-        for key, value in headers.items():
-            logger.info(f"  {key}: {value}")
         
         try:
-            # 只请求头部，不下载完整文件
+            # 先访问referer页面建立session
+            logger.info("📄 先访问来源页面...")
+            self.client.get(referer_url, timeout=10)
+            time.sleep(1)
+            
+            # 使用HEAD请求测试（不下载完整文件）
+            headers = {
+                'Referer': referer_url,
+                'Sec-Fetch-Site': 'cross-site',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Dest': 'document',
+            }
+            
             response = self.client.head(zip_url, headers=headers, timeout=30)
             
             logger.info(f"\n响应状态: {response.status_code}")
             logger.info(f"响应头:")
-            for key, value in response.headers.items():
-                logger.info(f"  {key}: {value}")
+            for key in ['Content-Type', 'Content-Length', 'X-Tengine-Error']:
+                if key in response.headers:
+                    logger.info(f"  {key}: {response.headers[key]}")
             
             if response.status_code == 200:
-                logger.info("\n✅ 成功！可以下载")
-                file_size = response.headers.get('content-length', 'unknown')
+                logger.info("\n✅ 测试成功！可以下载")
+                file_size = response.headers.get('Content-Length', 'unknown')
                 logger.info(f"文件大小: {file_size} 字节")
                 return True
+            elif response.status_code == 403:
+                logger.error("\n❌ 测试失败！403 Forbidden")
+                tengine_error = response.headers.get('X-Tengine-Error', '')
+                if tengine_error:
+                    logger.error(f"   X-Tengine-Error: {tengine_error}")
+                return False
             else:
-                logger.error(f"\n❌ 失败！状态码: {response.status_code}")
+                logger.warning(f"\n⚠️ 意外的状态码: {response.status_code}")
                 return False
                 
         except Exception as e:
@@ -331,18 +316,23 @@ if __name__ == "__main__":
     pm = ProxyManager()
     pm.test_all_nodes()
     
-    client = HTTPClient(use_proxy=True, proxy_manager=pm)
-    db = Database()
+    # 使用随机节点的代理URL
+    pm.select_random()
+    proxy_url = f"http://127.0.0.1:{pm.local_port}"
     
-    scraper = DownloadScraper(client, db)
+    client = HTTPClient(use_proxy=True, proxy_url=proxy_url)
     
-    # 测试案例：你提供的链接
+    # 假设Database类存在
+    # db = Database()
+    # scraper = DownloadScraper(client, db)
+    
+    # 测试防盗链绕过
     print("\n" + "=" * 60)
     print("🧪 测试防盗链绕过")
     print("=" * 60)
     
-    test_zip_url = "https://ipo.ai-tag.cn/2023/12/202312251405085991116.zip"
-    test_referer = "https://ipoipo.cn/xiazai/123456/"  # 替换为实际的下载页URL
+    test_zip_url = "https://ipo.ai-tag.cn/2025/04/202504291200327477262.zip"
+    test_referer = "https://ipoipo.cn/xiazai/123456/"
     
     # 测试1: 不带Referer（应该失败）
     print("\n测试1: 不带Referer")
@@ -354,19 +344,17 @@ if __name__ == "__main__":
     
     # 测试2: 带Referer（应该成功）
     print("\n测试2: 带Referer")
-    scraper.test_download_with_referer(test_zip_url, test_referer)
-    
-    # 测试3: 完整流程
-    print("\n" + "=" * 60)
-    print("🔄 测试完整下载流程")
-    print("=" * 60)
-    scraper.process_all_pending_reports(limit=3)
-    
-    # 显示统计
-    stats = db.get_stats()
-    print(f"\n📊 统计:")
-    print(f"  - 总报告数: {stats['total_reports']}")
-    print(f"  - 按状态分布: {stats.get('reports_by_status', {})}")
+    print("先访问来源页面...")
+    try:
+        client.get(test_referer, timeout=10)
+        time.sleep(1)
+        
+        headers = {'Referer': test_referer, 'Sec-Fetch-Site': 'cross-site'}
+        response = client.head(test_zip_url, headers=headers, timeout=10)
+        print(f"状态码: {response.status_code}")
+        if response.status_code == 200:
+            print("✅ 成功绕过防盗链！")
+    except Exception as e:
+        print(f"失败: {e}")
     
     client.close()
-    db.close()

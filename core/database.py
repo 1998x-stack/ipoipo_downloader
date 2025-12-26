@@ -1,5 +1,11 @@
 """
-数据库管理 - 使用SQLite记录下载状态
+数据库管理 - 使用SQLite记录下载状态（修复版）
+
+新增方法：
+- get_ready_reports(): 获取ready状态的报告
+- get_failed_reports(): 获取失败的报告
+- update_report_local_path(): 更新本地文件路径
+- get_reports_with_category(): 获取报告及分类名称
 """
 import sqlite3
 import json
@@ -49,7 +55,7 @@ class Database:
             )
         ''')
         
-        # 报告列表表
+        # 报告列表表（新增 local_path 字段）
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS reports (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -62,6 +68,7 @@ class Database:
                 view_count INTEGER DEFAULT 0,
                 publish_date TEXT,
                 status TEXT DEFAULT 'pending',
+                local_path TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (category_id) REFERENCES categories(category_id)
@@ -107,6 +114,13 @@ class Database:
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_downloads_status ON downloads(status)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_downloads_post_id ON downloads(post_id)')
         
+        # 检查并添加 local_path 列（兼容旧数据库）
+        try:
+            cursor.execute('SELECT local_path FROM reports LIMIT 1')
+        except sqlite3.OperationalError:
+            logger.info("📝 添加 local_path 列...")
+            cursor.execute('ALTER TABLE reports ADD COLUMN local_path TEXT')
+        
         conn.commit()
         logger.info("✅ 数据库初始化完成")
     
@@ -133,6 +147,14 @@ class Database:
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM categories ORDER BY category_id')
         return [dict(row) for row in cursor.fetchall()]
+    
+    def get_category_by_id(self, category_id: str) -> Optional[Dict]:
+        """根据ID获取分类"""
+        conn = self.connect()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM categories WHERE category_id = ?', (category_id,))
+        row = cursor.fetchone()
+        return dict(row) if row else None
     
     # ===== 报告操作 =====
     
@@ -169,42 +191,16 @@ class Database:
         ''', (download_url, post_id))
         conn.commit()
     
-    def get_report_by_post_id(self, post_id: str) -> Optional[Dict]:
-        """根据post_id获取报告"""
-        conn = self.connect()
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM reports WHERE post_id = ?', (post_id,))
-        row = cursor.fetchone()
-        return dict(row) if row else None
-    
-    def get_reports_by_category(self, category_id: str, status: str = None) -> List[Dict]:
-        """获取指定分类的报告"""
-        conn = self.connect()
-        cursor = conn.cursor()
-        if status:
-            cursor.execute('''
-                SELECT * FROM reports 
-                WHERE category_id = ? AND status = ?
-                ORDER BY id
-            ''', (category_id, status))
-        else:
-            cursor.execute('''
-                SELECT * FROM reports 
-                WHERE category_id = ?
-                ORDER BY id
-            ''', (category_id,))
-        return [dict(row) for row in cursor.fetchall()]
-    
-    def get_pending_reports(self, limit: int = 100) -> List[Dict]:
-        """获取待下载的报告"""
+    def update_report_local_path(self, post_id: str, local_path: str):
+        """更新报告的本地文件路径"""
         conn = self.connect()
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT * FROM reports 
-            WHERE status = 'pending'
-            LIMIT ?
-        ''', (limit,))
-        return [dict(row) for row in cursor.fetchall()]
+            UPDATE reports 
+            SET local_path = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE post_id = ?
+        ''', (local_path, post_id))
+        conn.commit()
     
     def update_report_status(self, post_id: str, status: str):
         """更新报告状态"""
@@ -216,6 +212,108 @@ class Database:
             WHERE post_id = ?
         ''', (status, post_id))
         conn.commit()
+    
+    def get_report_by_post_id(self, post_id: str) -> Optional[Dict]:
+        """根据post_id获取报告"""
+        conn = self.connect()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM reports WHERE post_id = ?', (post_id,))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+    
+    def get_reports_by_category(self, category_id: str, status: str = None) -> List[Dict]:
+        """获取指定分类的报告（包含分类名称）"""
+        conn = self.connect()
+        cursor = conn.cursor()
+        
+        if status:
+            cursor.execute('''
+                SELECT r.*, c.category_name 
+                FROM reports r
+                LEFT JOIN categories c ON r.category_id = c.category_id
+                WHERE r.category_id = ? AND r.status = ?
+                ORDER BY r.id
+            ''', (category_id, status))
+        else:
+            cursor.execute('''
+                SELECT r.*, c.category_name 
+                FROM reports r
+                LEFT JOIN categories c ON r.category_id = c.category_id
+                WHERE r.category_id = ?
+                ORDER BY r.id
+            ''', (category_id,))
+        
+        return [dict(row) for row in cursor.fetchall()]
+    
+    def get_pending_reports(self, limit: int = 100) -> List[Dict]:
+        """获取待处理的报告（status='pending'，需要获取download_url）"""
+        conn = self.connect()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT r.*, c.category_name 
+            FROM reports r
+            LEFT JOIN categories c ON r.category_id = c.category_id
+            WHERE r.status = 'pending'
+            ORDER BY r.id
+            LIMIT ?
+        ''', (limit,))
+        return [dict(row) for row in cursor.fetchall()]
+    
+    def get_ready_reports(self, limit: int = 1000) -> List[Dict]:
+        """获取准备下载的报告（status='ready'，已有download_url）"""
+        conn = self.connect()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT r.*, c.category_name 
+            FROM reports r
+            LEFT JOIN categories c ON r.category_id = c.category_id
+            WHERE r.status = 'ready' AND r.download_url IS NOT NULL AND r.download_url != ''
+            ORDER BY r.id
+            LIMIT ?
+        ''', (limit,))
+        return [dict(row) for row in cursor.fetchall()]
+    
+    def get_failed_reports(self, limit: int = 100) -> List[Dict]:
+        """获取下载失败的报告（status='failed'）"""
+        conn = self.connect()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT r.*, c.category_name 
+            FROM reports r
+            LEFT JOIN categories c ON r.category_id = c.category_id
+            WHERE r.status = 'failed' AND r.download_url IS NOT NULL AND r.download_url != ''
+            ORDER BY r.id
+            LIMIT ?
+        ''', (limit,))
+        return [dict(row) for row in cursor.fetchall()]
+    
+    def get_downloaded_reports(self, limit: int = 1000) -> List[Dict]:
+        """获取已下载的报告（status='downloaded'）"""
+        conn = self.connect()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT r.*, c.category_name 
+            FROM reports r
+            LEFT JOIN categories c ON r.category_id = c.category_id
+            WHERE r.status = 'downloaded'
+            ORDER BY r.id
+            LIMIT ?
+        ''', (limit,))
+        return [dict(row) for row in cursor.fetchall()]
+    
+    def get_reports_by_status(self, status: str, limit: int = 1000) -> List[Dict]:
+        """根据状态获取报告"""
+        conn = self.connect()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT r.*, c.category_name 
+            FROM reports r
+            LEFT JOIN categories c ON r.category_id = c.category_id
+            WHERE r.status = ?
+            ORDER BY r.id
+            LIMIT ?
+        ''', (status, limit))
+        return [dict(row) for row in cursor.fetchall()]
     
     # ===== 下载记录操作 =====
     
@@ -278,6 +376,35 @@ class Database:
         download = self.get_download_by_post_id(post_id)
         return download and download['status'] == 'completed'
     
+    # ===== 批量操作 =====
+    
+    def batch_update_status(self, post_ids: List[str], status: str):
+        """批量更新报告状态"""
+        conn = self.connect()
+        cursor = conn.cursor()
+        
+        placeholders = ','.join(['?' for _ in post_ids])
+        cursor.execute(f'''
+            UPDATE reports 
+            SET status = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE post_id IN ({placeholders})
+        ''', [status] + post_ids)
+        
+        conn.commit()
+        return cursor.rowcount
+    
+    def reset_failed_reports(self) -> int:
+        """重置所有失败的报告为ready状态"""
+        conn = self.connect()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE reports 
+            SET status = 'ready', updated_at = CURRENT_TIMESTAMP
+            WHERE status = 'failed' AND download_url IS NOT NULL
+        ''')
+        conn.commit()
+        return cursor.rowcount
+    
     # ===== 统计操作 =====
     
     def get_stats(self) -> Dict:
@@ -307,6 +434,48 @@ class Database:
         cursor.execute('SELECT COUNT(*) FROM downloads WHERE status = "failed"')
         stats['downloads_failed'] = cursor.fetchone()[0]
         
+        # 有下载链接的报告数
+        cursor.execute('SELECT COUNT(*) FROM reports WHERE download_url IS NOT NULL AND download_url != ""')
+        stats['reports_with_url'] = cursor.fetchone()[0]
+        
+        # 各分类的报告数
+        cursor.execute('''
+            SELECT c.category_name, COUNT(r.id) as count
+            FROM categories c
+            LEFT JOIN reports r ON c.category_id = r.category_id
+            GROUP BY c.category_id
+            ORDER BY count DESC
+        ''')
+        stats['reports_by_category'] = dict(cursor.fetchall())
+        
+        return stats
+    
+    def get_category_stats(self, category_id: str) -> Dict:
+        """获取指定分类的统计信息"""
+        conn = self.connect()
+        cursor = conn.cursor()
+        
+        stats = {}
+        
+        # 分类信息
+        cursor.execute('SELECT * FROM categories WHERE category_id = ?', (category_id,))
+        row = cursor.fetchone()
+        if row:
+            stats['category'] = dict(row)
+        
+        # 该分类的报告数
+        cursor.execute('SELECT COUNT(*) FROM reports WHERE category_id = ?', (category_id,))
+        stats['total_reports'] = cursor.fetchone()[0]
+        
+        # 各状态报告数
+        cursor.execute('''
+            SELECT status, COUNT(*) 
+            FROM reports 
+            WHERE category_id = ?
+            GROUP BY status
+        ''', (category_id,))
+        stats['reports_by_status'] = dict(cursor.fetchall())
+        
         return stats
 
 
@@ -318,7 +487,23 @@ if __name__ == "__main__":
     db.insert_category("34", "经济报告", "https://ipoipo.cn/tags-34.html")
     db.insert_report("34", "26028", "测试报告", "https://ipoipo.cn/post/26028.html")
     
+    # 更新下载URL
+    db.update_report_download_url("26028", "https://ipo.ai-tag.cn/test.zip")
+    db.update_report_status("26028", "ready")
+    
+    # 测试新方法
+    print("\n📋 Ready reports:")
+    ready = db.get_ready_reports(limit=10)
+    for r in ready:
+        print(f"  - {r['title']}: {r['status']}")
+    
+    print("\n📋 Failed reports:")
+    failed = db.get_failed_reports(limit=10)
+    for r in failed:
+        print(f"  - {r['title']}: {r['status']}")
+    
     # 获取统计
+    print("\n📊 统计信息:")
     stats = db.get_stats()
     print(json.dumps(stats, indent=2, ensure_ascii=False))
     

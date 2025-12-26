@@ -9,7 +9,7 @@
             "args": [
                 "--full",
                 "--max-pages",
-                "1"
+                "10"
             ],
             "console": "integratedTerminal",
             "justMyCode": true

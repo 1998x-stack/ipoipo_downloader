@@ -1,5 +1,8 @@
 """
-文件管理器 - 处理文件命名、路径和解压（改进版）
+文件管理器 - 处理文件命名、路径和解压（修复版）
+
+新增方法：
+- get_report_path(): 获取报告文件保存路径
 """
 import os
 import re
@@ -71,16 +74,66 @@ class FileManager:
         
         return name + ext if ext else name
     
-    def get_category_dir(self, category_id: str) -> Path:
-        """获取分类目录"""
-        category_name = CATEGORY_NAMES.get(category_id, f"category_{category_id}")
-        category_dir = self.base_dir / self.sanitize_filename(category_name, is_folder=True)
+    def get_category_dir(self, category_name: str) -> Path:
+        """
+        获取分类目录
+        
+        Args:
+            category_name: 分类名称（如 "经济报告"）
+        """
+        # 清理分类名称
+        clean_name = self.sanitize_filename(category_name, is_folder=True)
+        category_dir = self.base_dir / clean_name
         category_dir.mkdir(parents=True, exist_ok=True)
         return category_dir
     
+    def get_category_dir_by_id(self, category_id: str) -> Path:
+        """
+        根据分类ID获取分类目录
+        
+        Args:
+            category_id: 分类ID（如 "34"）
+        """
+        category_name = CATEGORY_NAMES.get(category_id, f"category_{category_id}")
+        return self.get_category_dir(category_name)
+    
+    def get_report_path(self, category_name: str, filename: str) -> str:
+        """
+        获取报告文件的完整保存路径
+        
+        Args:
+            category_name: 分类名称（如 "经济报告"）
+            filename: 文件名（如 "report.zip"）
+            
+        Returns:
+            完整的文件路径字符串
+        """
+        # 获取分类目录
+        category_dir = self.get_category_dir(category_name)
+        
+        # 清理文件名
+        clean_filename = self.sanitize_filename(filename)
+        
+        # 返回完整路径
+        return str(category_dir / clean_filename)
+    
+    def get_report_path_by_id(self, category_id: str, filename: str) -> str:
+        """
+        根据分类ID获取报告文件路径
+        
+        Args:
+            category_id: 分类ID
+            filename: 文件名
+            
+        Returns:
+            完整的文件路径字符串
+        """
+        category_name = CATEGORY_NAMES.get(category_id, f"category_{category_id}")
+        return self.get_report_path(category_name, filename)
+    
     def get_report_dir(self, category_id: str, report_title: str) -> Path:
-        """获取报告目录"""
-        category_dir = self.get_category_dir(category_id)
+        """获取报告目录（每个报告单独一个目录）"""
+        category_dir = self.get_category_dir_by_id(category_id)
         report_name = self.sanitize_filename(report_title, is_folder=True)
         report_dir = category_dir / report_name
         report_dir.mkdir(parents=True, exist_ok=True)
@@ -141,10 +194,12 @@ class FileManager:
         # 如果没有提供时间戳，尝试从原文件名提取
         if not timestamp:
             timestamp = self.extract_timestamp_from_filename(original_path.stem)
+        timestamp = str(timestamp)[:8]
         
         # 清理报告标题
         clean_title = self.sanitize_filename(report_title, is_folder=False)
-        clean_title = clean_title.replace('.', '_')  # 移除标题中的点
+        clean_title = clean_title.replace('.', '_').replace(" ", "")  # 移除标题中的点
+        clean_title = clean_title.strip()
         
         # 组合新文件名
         new_filename = f"{timestamp}{clean_title}{ext}"
@@ -387,6 +442,15 @@ class FileManager:
         except Exception as e:
             logger.error(f"❌ ZIP验证失败: {e}")
             return False
+    
+    def ensure_directory(self, path: str) -> Path:
+        """确保目录存在"""
+        dir_path = Path(path)
+        if dir_path.suffix:
+            # 如果是文件路径，获取父目录
+            dir_path = dir_path.parent
+        dir_path.mkdir(parents=True, exist_ok=True)
+        return dir_path
 
 
 if __name__ == "__main__":
@@ -410,7 +474,16 @@ if __name__ == "__main__":
         print(f"清理: {clean_name}\n")
     
     print("=" * 60)
-    print("测试2: 时间戳提取")
+    print("测试2: get_report_path")
+    print("=" * 60)
+    
+    path = fm.get_report_path("经济报告", "202504291200327477262.zip")
+    print(f"分类: 经济报告")
+    print(f"文件名: 202504291200327477262.zip")
+    print(f"完整路径: {path}")
+    
+    print("\n" + "=" * 60)
+    print("测试3: 时间戳提取")
     print("=" * 60)
     test_timestamps = [
         "202512040933142933045.zip",
@@ -424,7 +497,7 @@ if __name__ == "__main__":
         print(f"{filename} -> {timestamp}")
     
     print("\n" + "=" * 60)
-    print("测试3: 新文件名生成")
+    print("测试4: 新文件名生成")
     print("=" * 60)
     test_file = Path("202512040933142933045.zip")
     report_title = "包装出海研究报告：纸包装、金属包装、塑料包装（33页）"
