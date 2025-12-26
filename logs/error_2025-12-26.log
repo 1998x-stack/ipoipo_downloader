@@ -1,0 +1,264 @@
+2025-12-26 22:57:23 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/12/202512021210306166199.zip
+2025-12-26 22:57:23 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 银行行业深度报告：零售金融业务有哪些变化（16页）
+2025-12-26 22:57:23 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/12/202512021142562698805.zip
+2025-12-26 22:57:23 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 2025年金融消费趋势洞察研究报告（33页）
+2025-12-26 22:57:23 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/11/202511211413215271885.zip
+2025-12-26 22:57:23 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 险企FVOCI投资专题分析报告（29页）
+2025-12-26 22:57:23 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/11/202511211403391699342.zip
+2025-12-26 22:57:23 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 存款非银化对流动性风险指标的影响与测算研究报告（18页）
+2025-12-26 22:57:23 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/11/202511201509095542422.zip
+2025-12-26 22:57:23 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 商业健康保险行业报告：健康险有望迎来新的机遇期（22页）
+2025-12-26 22:57:23 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/11/202511201525058933142.zip
+2025-12-26 22:57:23 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 公募基金行业专题报告：细读“比较基准”新规（13页）
+2025-12-26 22:57:24 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/11/202511121335559402063.zip
+2025-12-26 22:57:24 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国金融生成式AI多模态内容鉴伪与安全防御报告（67页）
+2025-12-26 22:57:24 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/11/202511111336138344559.zip
+2025-12-26 22:57:24 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 金融脱媒背景下商业银行的挑战与应对研究报告：基于中美比较的转型路径（11页）
+2025-12-26 22:57:24 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/11/202511111014431832761.zip
+2025-12-26 22:57:24 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 保险行业报告：中国个险渠道三十年（33页）
+2025-12-26 22:57:24 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/11/202511111001127340534.zip
+2025-12-26 22:57:24 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 保险行业专题报告：资负两端基本面改善趋势明确（23页）
+2025-12-26 22:57:24 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/10/202510160959226873013.zip
+2025-12-26 22:57:24 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 租赁行业报告：研究框架（64页）
+2025-12-26 22:57:24 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/10/202510160954406619198.zip
+2025-12-26 22:57:24 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国保险金信托行业发展报告（90页）
+2025-12-26 22:57:24 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/10/202510100955266737309.zip
+2025-12-26 22:57:24 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国银行全球银行业展望报告2025年第4季度报告（59页）
+2025-12-26 22:57:24 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/10/202510091508154827852.zip
+2025-12-26 22:57:24 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 银行投资基金研究报告：现状洞察、费改破局与逻辑重塑（33页）
+2025-12-26 22:57:24 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/09/202509231443519042527.zip
+2025-12-26 22:57:24 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国购车家庭收支洞察报告：房贷篇（28页）
+2025-12-26 22:57:24 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/09/202509221023083937079.zip
+2025-12-26 22:57:24 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国企业供应链金融白皮书（68页）
+2025-12-26 22:57:24 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/10/202510211547553715222.zip
+2025-12-26 22:57:24 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国网络助贷行业研究报告（38页）
+2025-12-26 22:57:24 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/09/202509191403223921712.zip
+2025-12-26 22:57:24 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 加密货币的演进与稳定币产业生态布局报告（29页）
+2025-12-26 22:57:24 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/09/202509151546209646606.zip
+2025-12-26 22:57:24 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国企业并购市场2025年中回顾及展望报告（36页）
+2025-12-26 22:57:25 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/09/202509151548245624453.zip
+2025-12-26 22:57:25 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国银行业理财业务发展报告：暨理财公司2025年鉴（342页）
+2025-12-26 22:57:25 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/09/202509151532545262113.zip
+2025-12-26 22:57:25 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 新能源车险研究报告（25页）
+2025-12-26 22:57:25 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/09/202509151522379100307.zip
+2025-12-26 22:57:25 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 数字资产研究报告：稳定币（50页）
+2025-12-26 22:57:25 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/09/202509151015023184819.zip
+2025-12-26 22:57:25 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 全球跨境支付服务行业洞察报告（38页）
+2025-12-26 22:57:25 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/09/202509101349586889000.zip
+2025-12-26 22:57:25 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 2025年H1中国手机银行APP流量监测报告（13页）
+2025-12-26 22:57:25 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/09/202509091015263244951.zip
+2025-12-26 22:57:25 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 农业保险发展水平评价与研究报告（57页）
+2025-12-26 22:57:25 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/09/202509091013417991927.zip
+2025-12-26 22:57:25 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国股权市场特征与展望报告（22页）
+2025-12-26 22:57:25 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/09/202509090947559195227.zip
+2025-12-26 22:57:25 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国量化投资白皮书（340页）
+2025-12-26 22:57:25 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/09/202509090954238374481.zip
+2025-12-26 22:57:25 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国场外金融衍生品市场发展报告（77页）
+2025-12-26 22:57:25 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/09/202509031342081511000.zip
+2025-12-26 22:57:25 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 寿险公司的利差风险研究报告：净资产对利率的敏感性分析和保单负债成本测算（17页）
+2025-12-26 22:57:25 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/09/202509031336316189518.zip
+2025-12-26 22:57:25 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国人身险银保渠道三十年演进与价值跃迁研究报告（38页）
+2025-12-26 22:57:25 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/08/202508251143168406314.zip
+2025-12-26 22:57:25 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 银行路径、规模与海外镜鉴报告：低利率下的居民“存款搬家”及财富配置（37页）
+2025-12-26 22:57:26 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/08/202508181347065532789.zip
+2025-12-26 22:57:26 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国证券业调查报告（113页）
+2025-12-26 22:57:26 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/08/202508121531385731568.zip
+2025-12-26 22:57:26 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 稳定币行业报告：加密产业价值地图（44页）
+2025-12-26 22:57:26 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/08/202508121529532693188.zip
+2025-12-26 22:57:26 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 保险行业报告：中国人身险产品变迁历史与未来展望（23页）
+2025-12-26 22:57:26 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/08/202508120954593021489.zip
+2025-12-26 22:57:26 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 稳定币与RWA的全景报告（21页）
+2025-12-26 22:57:26 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/08/202508120946405014664.zip
+2025-12-26 22:57:26 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 稳定币专题报告：稳定币有望助推人民币国际化（12页）
+2025-12-26 22:57:26 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/08/202508120934149571385.zip
+2025-12-26 22:57:26 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 银行行业报告：资负结构转化中的银行利率风险重估（56页）
+2025-12-26 22:57:26 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/08/202508120928388531580.zip
+2025-12-26 22:57:26 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 财富管理行业报告：公募基金改革方案（25页）
+2025-12-26 22:57:27 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/08/202508050933058683328.zip
+2025-12-26 22:57:27 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 全球稳定币产业发展报告（64页）
+2025-12-26 22:57:27 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/07/202507291042073714403.zip
+2025-12-26 22:57:27 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: RWA代币化研究报告（21页）
+2025-12-26 22:57:27 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/07/202507250937364263472.zip
+2025-12-26 22:57:27 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 金融产品行业报告：低利率时代REITs的配置价值，制度、市场与展望（31页）
+2025-12-26 22:57:27 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/07/202507240922044028916.zip
+2025-12-26 22:57:27 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 银行历次存款整改和利率下调回顾与复盘报告（24页）
+2025-12-26 22:57:27 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/07/202507231006241629544.zip
+2025-12-26 22:57:27 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 保险行业报告：普惠保险体系（19页）
+2025-12-26 22:57:27 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/07/202507221454471483561.zip
+2025-12-26 22:57:27 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 高质量发展增量政策对金融行业影响解析报告（37页）
+2025-12-26 22:57:27 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/07/202507221341271443440.zip
+2025-12-26 22:57:27 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国租赁业调查报告（104页）
+2025-12-26 22:57:27 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/07/202507111402317900222.zip
+2025-12-26 22:57:27 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 稳定币研究报告：数字金融（19页）
+2025-12-26 22:57:27 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/07/202507111359428436112.zip
+2025-12-26 22:57:27 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: RWA代币化研究报告（32页）
+2025-12-26 22:57:27 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/07/202507111352536890464.zip
+2025-12-26 22:57:27 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 稳定币行业报告：稳定币法案，发行平台、支付以及RWA场景（40页）
+2025-12-26 22:57:27 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/07/202507101458442088320.zip
+2025-12-26 22:57:27 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 保险行业AI应用全景洞察报告：保险业数智化转型与未来展望（33页）
+2025-12-26 22:57:27 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/07/202507101455241655741.zip
+2025-12-26 22:57:27 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 稳定币行业报告（17页）
+2025-12-26 22:57:28 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/07/202507101449505076712.zip
+2025-12-26 22:57:28 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 从稳定币产业链看加密货币行业投资价值研究报告（29页）
+2025-12-26 22:57:28 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/07/202507101453492908438.zip
+2025-12-26 22:57:28 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 稳定币+数字人民币研究报告：共同推进人民币国际化（28页）
+2025-12-26 22:57:28 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/07/202507101426483034660.zip
+2025-12-26 22:57:28 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 稳定币专题报告：全球支付体系（9页）
+2025-12-26 22:57:28 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/07/202507081648026650710.zip
+2025-12-26 22:57:28 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 长护险深度报告：长护险有望催生万亿级护理需求（61页）
+2025-12-26 22:57:28 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/07/202507011410222813529.zip
+2025-12-26 22:57:28 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 两轮贸易摩擦及两融表现的对比分析报告（58页）
+2025-12-26 22:57:28 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/07/202507291044102210667.zip
+2025-12-26 22:57:28 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 全球虚拟资产牌照研究报告（24页）
+2025-12-26 22:57:28 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/07/202507011352082766180.zip
+2025-12-26 22:57:28 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 稳定币+RWA真实世界资产研究报告：跃向数字金融3.0（30页）
+2025-12-26 22:57:28 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/06/202506271001294918097.zip
+2025-12-26 22:57:28 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国的养老保险基金投资管理现状与前景展望报告（20页）
+2025-12-26 22:57:28 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/06/202506251422394231772.zip
+2025-12-26 22:57:28 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 稳定币专题报告：香港监管框架下的机遇与挑战（25页）
+2025-12-26 22:57:29 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/06/202506251426016217942.zip
+2025-12-26 22:57:29 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 银行行业报告：新规过渡尚存调整空间（30页）
+2025-12-26 22:57:29 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/06/202506241352075190266.zip
+2025-12-26 22:57:29 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国银行业调查报告（231页）
+2025-12-26 22:57:29 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/06/202506230947405366922.zip
+2025-12-26 22:57:29 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 保险行业专题报告：估值驱动主要来自资产端（21页）
+2025-12-26 22:57:29 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/06/202506181013312775337.zip
+2025-12-26 22:57:29 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 稳定币研究报告：稳定币法案落地（32页）
+2025-12-26 22:57:29 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/06/202506171146147718455.zip
+2025-12-26 22:57:29 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 银行业稳息差、稳信用与银行投资展望报告（22页）
+2025-12-26 22:57:29 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/06/202506171147431147388.zip
+2025-12-26 22:57:29 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 财富管理行业报告：财富管理新时代（36页）
+2025-12-26 22:57:30 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/06/202506111521187125184.zip
+2025-12-26 22:57:30 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国供应链金融科技行业蓝皮书（31页）
+2025-12-26 22:57:30 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/06/202506041151315525674.zip
+2025-12-26 22:57:30 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国互联网保险消费者洞察报告（74页）
+2025-12-26 22:57:30 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/05/202505291534204597692.zip
+2025-12-26 22:57:30 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国机构配置手册：银行资产负债篇（115页）
+2025-12-26 22:57:30 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/05/202505221458413775923.zip
+2025-12-26 22:57:30 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 2024年中国创投市场数据报告（73页）
+2025-12-26 22:57:30 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/05/202505191219393501370.zip
+2025-12-26 22:57:30 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国人身险产品变迁历史与未来展望系列报告（21页）
+2025-12-26 22:57:30 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/06/202506181022038068093.zip
+2025-12-26 22:57:30 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 稳定币研究报告：如何重塑非银金融生态（31页）
+2025-12-26 22:57:30 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/06/202506171151526359663.zip
+2025-12-26 22:57:30 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 现实世界资产代币化行业报告：RWA（30页）
+2025-12-26 22:57:30 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/05/202505121147254793602.zip
+2025-12-26 22:57:30 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 消费类REITs研究报告（27页）
+2025-12-26 22:57:30 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/05/202505061620105292913.zip
+2025-12-26 22:57:30 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 银行行业报告：从年报看国有大行经营与资产配置变化（37页）
+2025-12-26 22:57:30 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/05/202505061340425919384.zip
+2025-12-26 22:57:31 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国人身险产品变迁历史与未来展望系列报告（38页）
+2025-12-26 22:57:31 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/05/202505061052396554356.zip
+2025-12-26 22:57:31 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 银行行业报告：利润调节器，从拨备论证大行盈利确定性价值（43页）
+2025-12-26 22:57:31 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/05/202505061028403188724.zip
+2025-12-26 22:57:31 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 保险行业研究报告：低利率下保险资金入市必要性提升（26页）
+2025-12-26 22:57:31 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/04/202504301047162891843.zip
+2025-12-26 22:57:31 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 海外养老保险体系研究报告：英国、德国、加拿大、智利（34页）
+2025-12-26 22:57:31 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/04/202504291401122308945.zip
+2025-12-26 22:57:31 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 女性财富管理机遇与金融机构行动指南（34页）
+2025-12-26 22:57:31 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/04/202504291200327477262.zip
+2025-12-26 22:57:31 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 2025年“十五五”金融规划研究白皮书（85页）
+2025-12-26 22:57:31 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/04/202504281417004540388.zip
+2025-12-26 22:57:31 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国A股上市公司股权激励年度实践报告（62页）
+2025-12-26 22:57:31 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/04/202504281415192102945.zip
+2025-12-26 22:57:31 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 智能金融行业报告：AI驱动的金融变革（46页）
+2025-12-26 22:57:31 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/05/202505271544205526172.zip
+2025-12-26 22:57:31 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 稳定币行业报告（43页）
+2025-12-26 22:57:31 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/05/202505271533069979693.zip
+2025-12-26 22:57:31 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 2025年Q1中国手机银行APP流量监测报告（13页）
+2025-12-26 22:57:31 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/04/202504281407408275890.zip
+2025-12-26 22:57:31 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 商业健康险的海外启示和国内路径探索研究报告（95页）
+2025-12-26 22:57:31 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/04/202504270923253171821.zip
+2025-12-26 22:57:31 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 虚拟货币全景洞察报告：深度剖析概念、历史、技术、现状与趋势（27页）
+2025-12-26 22:57:31 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/04/202504151528136643585.zip
+2025-12-26 22:57:31 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 非银行金融行业深度研究报告：金融IT商业模式、产品和客户全方位对比（30页）
+2025-12-26 22:57:31 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/04/202504151519096330741.zip
+2025-12-26 22:57:31 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国金融科技（FinTech）行业发展洞察报告（66页）
+2025-12-26 22:57:32 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/05/202505130931589783145.zip
+2025-12-26 22:57:32 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 2025年中国私募股权二级市场专题研究报告：S基金（40页）
+2025-12-26 22:57:32 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/04/202504150913378240167.zip
+2025-12-26 22:57:32 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 银行业专题报告：成渝经济圈建设赋能区域银行经营（29页）
+2025-12-26 22:57:32 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/04/202504141427164591875.zip
+2025-12-26 22:57:32 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 美国共同基金费率下行时期的特征及业务机遇研究报告（29页）
+2025-12-26 22:57:32 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/04/202504101008142013095.zip
+2025-12-26 22:57:32 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 飞机租赁行业报告（31页）
+2025-12-26 22:57:32 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/04/202504081358019977071.zip
+2025-12-26 22:57:32 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 消费金融系列报告：从头部信贷科技平台看长尾客群变化（16页）
+2025-12-26 22:57:32 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/04/202504071601035589099.zip
+2025-12-26 22:57:32 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 2025年亚太私募股权年鉴—中国市场聚焦（20页）
+2025-12-26 22:57:32 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/04/202504071416371173977.zip
+2025-12-26 22:57:32 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 2025年全球私募股权报告（69页）
+2025-12-26 22:57:32 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/04/202504071559108392221.zip
+2025-12-26 22:57:32 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 2025年亚太私募股权年鉴（53页）
+2025-12-26 22:57:32 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/04/202504031553168841415.zip
+2025-12-26 22:57:32 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国债券市场概览报告（2024年版，154页）
+2025-12-26 22:57:32 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/04/202504281432119231451.zip
+2025-12-26 22:57:32 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 2025年第一季度中国内地和香港IPO市场报告（19页）
+2025-12-26 22:57:32 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/03/202503311024239500705.zip
+2025-12-26 22:57:32 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 气候政策与绿色金融报告（72页）
+2025-12-26 22:57:32 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/03/202503190949189871419.zip
+2025-12-26 22:57:32 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 低利率下保险业的困境与出路研究报告：日本、美国、德国经验（23页）
+2025-12-26 22:57:33 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/03/202503131006094852196.zip
+2025-12-26 22:57:33 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 养老产业现状研究报告：养老金融的银行实践（22页）
+2025-12-26 22:57:33 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/03/202503130954473417885.zip
+2025-12-26 22:57:33 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 低利率下保险业的困境与出路研究报告（22页）
+2025-12-26 22:57:33 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/03/202503111521113708598.zip
+2025-12-26 22:57:33 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 理财持仓全景报告：理财公司竞合图谱与投资行为全盘解析（58页）
+2025-12-26 22:57:33 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/03/202503111025245566571.zip
+2025-12-26 22:57:33 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 美国资产货币化对金价的影响研究报告（15页）
+2025-12-26 22:57:33 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/03/202503111015566756981.zip
+2025-12-26 22:57:33 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 保险保障基金专题报告（37页）
+2025-12-26 22:57:33 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/03/202503111008239081176.zip
+2025-12-26 22:57:33 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: REITs专题研究报告：政策支持范围扩大（31页）
+2025-12-26 22:57:33 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/03/202503031335374176534.zip
+2025-12-26 22:57:33 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 商业保险专题报告：医保（21页）
+2025-12-26 22:57:33 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/02/202502270935582290506.zip
+2025-12-26 22:57:33 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: Deepseek报告：AI赋能下的金融行业重构及变革（22页）
+2025-12-26 22:57:33 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/02/202502241012265406329.zip
+2025-12-26 22:57:33 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 居民财富管理需求研究报告（33页）
+2025-12-26 22:57:33 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/02/202502201044555285285.zip
+2025-12-26 22:57:33 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 券商行业报告：境内券商发展（35页）
+2025-12-26 22:57:33 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/02/202502171633195531765.zip
+2025-12-26 22:57:33 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国责任投资2024年度报告（47页）
+2025-12-26 22:57:33 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/03/202503190946583050763.zip
+2025-12-26 22:57:33 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国手机银行APP监测报告（31页）
+2025-12-26 22:57:33 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/02/202502171347416623295.zip
+2025-12-26 22:57:33 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 2024年银行资产负债安排收官回顾与2025年展望报告（70页）
+2025-12-26 22:57:34 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/02/202502171031149472967.zip
+2025-12-26 22:57:34 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 股权投资资本运营企业2024年信用回顾与2025年展望报告（34页）
+2025-12-26 22:57:34 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/02/202502171005321379773.zip
+2025-12-26 22:57:34 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 海外证券市场的发展逻辑与路径研究报告（21页）
+2025-12-26 22:57:34 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/02/202502111440082687123.zip
+2025-12-26 22:57:34 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 中国互联网保险发展报告（50页）
+2025-12-26 22:57:34 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/02/202502131616519512636.zip
+2025-12-26 22:57:34 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 巴西金融体系概览报告：海外新兴市场的金融旗舰（53页）
+2025-12-26 22:57:34 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/02/202502101106448098070.zip
+2025-12-26 22:57:34 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 香港ETF市场研究报告：五大观察（11页）
+2025-12-26 22:57:34 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/02/202502071325331535431.zip
+2025-12-26 22:57:34 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 融资租赁行业2024年信用回顾与2025年展望报告（31页）
+2025-12-26 22:57:34 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/02/202502071324149239942.zip
+2025-12-26 22:57:34 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 人身险行业2024年信用回顾与2025年展望报告（20页）
+2025-12-26 22:57:34 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/03/202503031531178440251.zip
+2025-12-26 22:57:34 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 全球家族办公室2024年调查见解报告（147页）
+2025-12-26 22:57:34 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/02/202502061305203368185.zip
+2025-12-26 22:57:34 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 计算机行业专题报告：金融IT（26页）
+2025-12-26 22:57:34 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/02/202502061118371286897.zip
+2025-12-26 22:57:34 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 商业健康险行业报告（50页）
+2025-12-26 22:57:34 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/02/202502081402494650042.zip
+2025-12-26 22:57:34 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 保险资金配置变迁、2025年预测及负债成本分析报告（29页）
+2025-12-26 22:57:34 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/02/202502061058248618295.zip
+2025-12-26 22:57:34 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 商业银行2024年信用回顾与2025年展望报告（48页）
+2025-12-26 22:57:35 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/02/202502061102378151576.zip
+2025-12-26 22:57:35 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 银行行业专题研究报告：理财监管持续规范（35页）
+2025-12-26 22:57:35 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/01/202501231348124585458.zip
+2025-12-26 22:57:35 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 养老保险体系研究报告：中国补充养老险（23页）
+2025-12-26 22:57:35 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/02/202502061043277279228.zip
+2025-12-26 22:57:35 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 证券行业2024年信用回顾与2025年展望报告（36页）
+2025-12-26 22:57:35 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/01/202501231155206756572.zip
+2025-12-26 22:57:35 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 非银金融行业报告：险资举牌风潮（26页）
+2025-12-26 22:57:35 | ERROR    | core.http_client:download_file:171 - ❌ 下载失败: ❌ 请求失败，已重试 1 次: https://ipo.ai-tag.cn/2025/01/202501231034066958160.zip
+2025-12-26 22:57:35 | ERROR    | download.downloader:download_report:98 - ❌ 下载失败: 地方不良资产管理行业2024年信用回顾与2025年展望报告（20页）
+2025-12-26 23:03:24 | ERROR    | __main__:main:259 - 
+❌ 发生错误: DownloadScraper.__init__() takes 2 positional arguments but 3 were given
+2025-12-26 23:06:03 | ERROR    | __main__:main:259 - 
+❌ 发生错误: 'DownloadScraper' object has no attribute 'process_all_pending_reports'
