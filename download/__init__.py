@@ -1,0 +1,1 @@
+"""Legacy download module - moved to src.downloader"""

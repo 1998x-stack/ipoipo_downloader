@@ -1,0 +1,1 @@
+"""Legacy core module - moved to src.model"""

@@ -8,15 +8,23 @@
 """
 import sys
 import argparse
+import os
+import sys
+import os
+import argparse
+
+# Add src to Python path to import modules
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+
 from utils.logger import get_logger
-from core.proxy_manager import ProxyManager
-from core.http_client import HTTPClient
-from core.database import Database
-from download.file_manager import FileManager
-from scrapers.category_scraper import CategoryScraper
-from scrapers.list_scraper import ListScraper
-from scrapers.download_scraper import DownloadScraper
-from download.downloader import Downloader
+from model.proxy_manager import ProxyManager
+from model.http_client import HTTPClient
+from model.database import Database
+from downloader.file_manager import FileManager
+from scraper.category_scraper import CategoryScraper
+from scraper.list_scraper import ListScraper
+from scraper.download_scraper import DownloadScraper
+from downloader.downloader import Downloader
 from config.settings import USE_PROXY
 
 logger = get_logger(__name__)

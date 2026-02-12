@@ -1,0 +1,1 @@
+"""Legacy scrapers module - moved to src.scraper"""

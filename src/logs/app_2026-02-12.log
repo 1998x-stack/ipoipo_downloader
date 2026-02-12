@@ -1,0 +1,88 @@
+2026-02-12 13:29:26 | INFO     | __main__:__init__:37 - 🚀 初始化IPO报告下载器...
+2026-02-12 13:29:26 | INFO     | model.proxy_manager:load_config:99 - 📂 加载代理配置: /Users/mx/Desktop/mycode/ipoipo_downloader/src/config/clash_config.yaml
+2026-02-12 13:29:26 | INFO     | model.proxy_manager:load_config:113 - 📌 检测到Clash端口配置: 7890
+2026-02-12 13:29:26 | INFO     | model.proxy_manager:load_config:115 - ✅ 加载了 45 个代理节点
+2026-02-12 13:29:26 | INFO     | model.proxy_manager:__init__:93 - 📡 使用本地Clash代理: http://127.0.0.1:7890
+2026-02-12 13:29:26 | INFO     | model.proxy_manager:__init__:94 - ⚠️  请确保Clash客户端正在运行！
+2026-02-12 13:29:26 | INFO     | __main__:__init__:46 - ⏳ 测试代理节点...
+2026-02-12 13:29:26 | INFO     | model.proxy_manager:test_all_nodes:188 - 🔍 开始测试 45 个节点...
+2026-02-12 13:29:26 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇭🇰 香港 01 解锁线路: 52ms
+2026-02-12 13:29:26 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇭🇰 香港 10 解锁线路: 51ms
+2026-02-12 13:29:26 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇭🇰 香港 08 解锁线路: 51ms
+2026-02-12 13:29:26 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇭🇰 香港 04 解锁线路: 52ms
+2026-02-12 13:29:26 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇭🇰 香港 07 解锁线路: 53ms
+2026-02-12 13:29:26 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇭🇰 香港 06 解锁线路: 54ms
+2026-02-12 13:29:26 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇭🇰 香港 02 解锁线路: 54ms
+2026-02-12 13:29:26 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇭🇰 香港 05 解锁线路: 56ms
+2026-02-12 13:29:26 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇭🇰 香港 09 解锁线路: 56ms
+2026-02-12 13:29:26 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇭🇰 香港 03 解锁线路: 56ms
+2026-02-12 13:29:26 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇯🇵 日本 03 原生线路: 96ms
+2026-02-12 13:29:26 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇯🇵 日本 04 原生线路: 96ms
+2026-02-12 13:29:26 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇯🇵 日本 02 原生线路: 97ms
+2026-02-12 13:29:26 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇯🇵 日本 01 原生线路: 98ms
+2026-02-12 13:29:26 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇰🇷 韩国 01 标准线路: 44ms
+2026-02-12 13:29:26 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇰🇷 韩国 02 标准线路: 45ms
+2026-02-12 13:29:26 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇰🇷 韩国 03 标准线路: 37ms
+2026-02-12 13:29:26 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇰🇷 韩国 04 标准线路: 40ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇹🇼 台湾 04 原生线路: 466ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇹🇼 台湾 01 原生线路: 469ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇹🇼 台湾 03 原生线路: 468ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇹🇼 台湾 02 原生线路: 469ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇺🇸 美国 03 原生线路: 386ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇺🇸 美国 02 原生线路: 478ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇺🇸 美国 01 原生线路: 479ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇺🇸 美国 04 原生线路: 387ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇭🇰 香港专线 02 倍率3: 38ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇭🇰 香港专线 01 倍率3: 40ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇭🇰 香港专线 04 倍率3: 40ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇭🇰 香港专线 05 倍率3: 41ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇯🇵 日本专线 01 倍率3: 40ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇭🇰 香港专线 03 倍率3: 43ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇹🇼 台湾专线 01 倍率3: 40ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇯🇵 日本专线 02 倍率3: 42ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇺🇸 美国专线 02 倍率3: 44ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇺🇸 美国专线 01 倍率3: 44ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇹🇼 台湾专线 02 倍率3: 45ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇰🇷 韩国专线 01 倍率3: 45ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇰🇷 韩国专线 02 倍率3: 38ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇸🇬 新加坡 02 解锁线路: 475ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇸🇬 新加坡专线 02 倍率3: 90ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇸🇬 新加坡 01 解锁线路: 481ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇸🇬 新加坡 04 解锁线路: 189ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇸🇬 新加坡 03 解锁线路: 190ms
+2026-02-12 13:29:27 | DEBUG    | model.proxy_manager:test_node:172 - ✅ 🇸🇬 新加坡专线 01 倍率3: 109ms
+2026-02-12 13:29:27 | INFO     | model.proxy_manager:test_all_nodes:205 - ✅ 可用节点: 45/45
+2026-02-12 13:29:27 | INFO     | model.proxy_manager:test_all_nodes:208 -   1. 🇰🇷 韩国 03 标准线路                                37ms
+2026-02-12 13:29:27 | INFO     | model.proxy_manager:test_all_nodes:208 -   2. 🇭🇰 香港专线 02 倍率3                               38ms
+2026-02-12 13:29:27 | INFO     | model.proxy_manager:test_all_nodes:208 -   3. 🇰🇷 韩国专线 02 倍率3                               38ms
+2026-02-12 13:29:27 | INFO     | model.proxy_manager:test_all_nodes:208 -   4. 🇭🇰 香港专线 01 倍率3                               40ms
+2026-02-12 13:29:27 | INFO     | model.proxy_manager:test_all_nodes:208 -   5. 🇹🇼 台湾专线 01 倍率3                               40ms
+2026-02-12 13:29:27 | INFO     | model.proxy_manager:test_all_nodes:208 -   6. 🇰🇷 韩国 04 标准线路                                40ms
+2026-02-12 13:29:27 | INFO     | model.proxy_manager:test_all_nodes:208 -   7. 🇯🇵 日本专线 01 倍率3                               40ms
+2026-02-12 13:29:27 | INFO     | model.proxy_manager:test_all_nodes:208 -   8. 🇭🇰 香港专线 04 倍率3                               40ms
+2026-02-12 13:29:27 | INFO     | model.proxy_manager:test_all_nodes:208 -   9. 🇭🇰 香港专线 05 倍率3                               41ms
+2026-02-12 13:29:27 | INFO     | model.proxy_manager:test_all_nodes:208 -   10. 🇯🇵 日本专线 02 倍率3                               42ms
+2026-02-12 13:29:27 | INFO     | model.proxy_manager:select_random:248 - 🎲 随机选择: 🇭🇰 香港 01 解锁线路 (52ms)
+2026-02-12 13:29:27 | INFO     | __main__:__init__:54 - 📡 使用代理: http://127.0.0.1:7890
+2026-02-12 13:29:27 | INFO     | __main__:__init__:55 - 📡 当前节点: 🇭🇰 香港 01 解锁线路
+2026-02-12 13:29:27 | INFO     | model.http_client:__init__:77 - 📡 使用代理: http://127.0.0.1:7890
+2026-02-12 13:29:27 | INFO     | model.database:init_database:130 - ✅ 数据库初始化完成
+2026-02-12 13:29:27 | INFO     | __main__:__init__:85 - ✅ 初始化完成！
+
+2026-02-12 13:29:27 | INFO     | __main__:show_stats:168 - 
+============================================================
+2026-02-12 13:29:27 | INFO     | __main__:show_stats:169 - 📊 统计信息
+2026-02-12 13:29:27 | INFO     | __main__:show_stats:170 - ============================================================
+2026-02-12 13:29:27 | INFO     | __main__:show_stats:171 - 分类数量: 0
+2026-02-12 13:29:27 | INFO     | __main__:show_stats:172 - 报告总数: 0
+2026-02-12 13:29:27 | INFO     | __main__:show_stats:173 - 
+按状态分布:
+2026-02-12 13:29:27 | INFO     | __main__:show_stats:176 - 
+下载统计:
+2026-02-12 13:29:27 | INFO     | __main__:show_stats:177 -   - 已完成: 0
+2026-02-12 13:29:27 | INFO     | __main__:show_stats:178 -   - 失败: 0
+2026-02-12 13:29:27 | INFO     | __main__:show_stats:179 - ============================================================
+2026-02-12 13:29:27 | INFO     | __main__:cleanup:224 - 🧹 清理资源...
+2026-02-12 13:29:27 | DEBUG    | model.http_client:close:286 - 🔒 HTTP客户端已关闭
+2026-02-12 13:29:27 | INFO     | __main__:main:377 - 
+✅ 程序结束

@@ -1,0 +1,1 @@
+"""Legacy config module - moved to src.config"""

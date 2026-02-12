@@ -1,285 +1,352 @@
-# IPO报告自动下载器
+<div align="center">
+  <h1>IPO IPO Downloader 📈</h1>
+  
+  <p><b>Automated IPO Research Reports Downloader</b></p>
+  <p>Intelligent scraper with proxy support, resumable downloads, and smart deduplication</p>
+  
+  ![Python](https://img.shields.io/badge/python-3.8%2B-blue)
+  ![License](https://img.shields.io/badge/license-MIT-green)
+  ![Status](https://img.shields.io/badge/status-active-success)
+  
+  <br>
+  <br>
+  <div>
+    <img src="https://img.shields.io/badge/Anti--Bot_Evasion-Enabled-critical" alt="Anti-Bot Evasion" />
+    <img src="https://img.shields.io/badge/Proxy_Support-Enabled-informational" alt="Proxy Support" />
+    <img src="https://img.shields.io/badge/Resumable_Downloads-Enabled-success" alt="Resumable Downloads" />
+    <img src="https://img.shields.io/badge/Smart_Caching-Enabled-yellow" alt="Smart Caching" />
+  </div>
+</div>
 
-一个完整的自动化报告下载系统，支持代理、断点续传、智能去重等功能。
+---
 
-## ✨ 功能特点
+## 🚀 Features
 
-- 🌐 **代理支持**: 自动解析Clash配置，智能选择最快节点
-- 🔄 **断点续传**: 支持中断后继续下载
-- 🚫 **智能去重**: 自动跳过已下载的文件
-- 📊 **状态管理**: SQLite数据库记录所有下载状态
-- 🎭 **防封策略**: fake-headers + 随机延迟
-- 📦 **自动解压**: 下载完成自动解压ZIP文件
-- 🗂️ **层级目录**: 按分类和报告名称组织文件
-- 📈 **进度显示**: 实时显示下载进度
-- ⚡ **并发下载**: 可选的多线程并发下载
+| Feature | Description |
+|--------|-------------|
+| 🌐 **Proxy Support** | Automatic Clash proxy configuration with node selection |
+| 🔄 **Resumable Downloads** | Continue interrupted downloads seamlessly |
+| 🚫 **Smart Deduplication** | Skip already downloaded files automatically |
+| 📊 **State Management** | SQLite database tracks download status |
+| 🎭 **Anti-Detection** | Fake headers + random delays to avoid blocking |
+| 📦 **Auto Extract** | ZIP files extracted automatically after download |
+| 🗂️ **Structured Storage** | Organized by category and report name |
+| 📈 **Progress Tracking** | Real-time download progress display |
+| ⚡ **Concurrent Download** | Optional multi-threaded downloads |
 
-## 📁 项目结构
+## 📁 Project Structure
 
 ```
 ipoipo_downloader/
-├── config/
-│   ├── settings.py          # 配置文件
-│   └── clash_config.yaml    # Clash代理配置
-├── core/
-│   ├── proxy_manager.py     # 代理管理器
-│   ├── http_client.py       # HTTP客户端
-│   └── database.py          # 数据库管理
-├── scrapers/
-│   ├── category_scraper.py  # 分类爬虫
-│   ├── list_scraper.py      # 列表爬虫
-│   └── download_scraper.py  # 下载链接爬虫
-├── download/
-│   ├── downloader.py        # 下载管理器
-│   └── file_manager.py      # 文件管理器
-├── utils/
-│   └── logger.py            # 日志配置
-├── main.py                  # 主程序
-└── requirements.txt
+├── src/                    # Source code
+│   ├── api/                # API interfaces
+│   ├── config/             # Configuration files
+│   ├── downloader/         # Download management
+│   ├── model/              # Data models & database
+│   ├── scraper/            # Scraping logic
+│   └── utils/              # Utility functions
+├── data/                   # Downloaded reports & database
+│   └── downloads/          # Organized by category
+├── docs/                   # Documentation
+├── logs/                   # Application logs
+├── tests/                  # Test suite
+├── config/                 # Legacy config (moved to src/config)
+├── core/                   # Legacy core (moved to src/model)
+├── download/               # Legacy download (moved to src/downloader)
+├── scrapers/               # Legacy scrapers (moved to src/scraper)
+├── utils/                  # Legacy utils (moved to src/utils)
+├── main.py                 # Entry point
+├── pyproject.toml          # Project metadata
+└── requirements.txt        # Dependencies
 ```
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 1. 安装依赖
+### Prerequisites
+- Python 3.8+
+- Pip package manager
+- (Optional) Running Clash proxy for enhanced anonymity
+
+### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/yourusername/ipoipo-downloader.git
+cd ipoipo-downloader
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Or install as a package
+pip install .
 ```
 
-### 2. 配置代理（可选）
+### Configuration
 
-将你的Clash配置文件放到 `config/clash_config.yaml`
+#### 1. Proxy Configuration (Optional)
+Place your Clash configuration in `src/config/clash_config.yaml` or skip this step to run without proxy.
 
-如果不使用代理，运行时加上 `--no-proxy` 参数。
+#### 2. Custom Settings
+Review and modify settings in `src/config/settings.py`.
 
-### 3. 运行程序
+### Usage
 
+#### View Help
 ```bash
-# 查看帮助
 python main.py --help
-
-# 运行完整流程（推荐先测试）
-python main.py --full --max-pages 2 --max-reports 10
-
-# 不使用代理运行
-python main.py --full --no-proxy --max-pages 2 --max-reports 10
 ```
 
-## 📝 使用示例
-
-### 完整流程
-
+#### Full Pipeline (Recommended for first run)
 ```bash
-# 每个分类爬2页，最多下载10个报告
+# Test run: 2 pages per category, max 10 reports
 python main.py --full --max-pages 2 --max-reports 10
 
-# 使用并发下载加速
-python main.py --full --max-pages 2 --max-reports 10 --concurrent
+# Production run: All categories, more extensive scraping
+python main.py --full --max-pages 10 --max-reports 100
 ```
 
-### 分阶段运行
-
+#### Stage-by-Stage Execution
 ```bash
-# Stage 1: 爬取分类列表
+# Stage 1: Scrape all categories
 python main.py --stage1
 
-# Stage 2: 爬取报告列表（所有分类，每个5页）
+# Stage 2: Scrape report lists (first 5 pages per category)
 python main.py --stage2 --max-pages 5
 
-# Stage 3: 获取下载链接（前50个报告）
-python main.py --stage3 --limit 50
+# Stage 3: Get download links for first 100 pending reports
+python main.py --stage3 --limit 100
 
-# Stage 4: 下载报告（最多20个，使用并发）
+# Stage 4: Download reports (up to 20, with concurrency)
 python main.py --stage4 --max-reports 20 --concurrent
 ```
 
-### 指定分类下载
-
+#### Specific Category Downloads
 ```bash
-# 只下载"经济报告"分类（ID=34）
-python main.py --stage2 --categories 34 --max-pages 5
+# Download specific categories only (e.g., Economic Reports: 34, AI: 85)
+python main.py --stage2 --categories 34 85 --max-pages 5
 python main.py --stage3 --limit 100
-python main.py --stage4 --category 34 --max-reports 10
+python main.py --stage4 --max-reports 20
 
-# 下载多个分类
-python main.py --stage2 --categories 34 69 85 --max-pages 3
+# Retry failed downloads
+python main.py --retry --max-reports 10
 ```
 
-### 查看统计
-
+#### Without Proxy
 ```bash
-python main.py --stats
+python main.py --full --no-proxy --max-pages 2 --max-reports 10
 ```
 
-## 📂 文件组织
+#### Extract Downloaded Archives
+```bash
+# Extract all ZIP files
+python main.py --extract
 
-下载的文件按以下结构组织：
-
-```
-downloads/
-├── 经济报告/
-│   ├── 中国地方公共数据开放利用报告/
-│   │   ├── 2025中国地方公共数据开放利用报告.zip
-│   │   └── [解压后的文件]
-│   └── 另一个报告/
-├── 人工智能AI/
-│   └── ...
-└── 其他分类/
+# Extract from specific category
+python main.py --extract --category 34 --max-reports 50
 ```
 
-## ⚙️ 配置说明
+## 📊 Supported Categories
 
-### `config/settings.py` 主要配置项：
+| ID | Category Name |
+|----|---------------|
+| 34 | Economic Reports |
+| 85 | Artificial Intelligence & AI |
+| 69 | New Energy & Power |
+| 53 | Medical & Healthcare |
+| 59 | Financial Industry |
+| 70 | TMT Industry |
+| 14 | Electronics Industry |
+| 10 | Smart Manufacturing |
 
+*See full list in `src/config/settings.py` under `CATEGORY_NAMES`*
+
+## ⚙️ Configuration Options
+
+### Core Settings (`src/config/settings.py`)
 ```python
-# 代理配置
-USE_PROXY = True              # 是否使用代理
-PROXY_TEST_TIMEOUT = 5        # 代理测速超时（秒）
+# Proxy Configuration
+USE_PROXY = True                    # Enable/disable proxy usage
+PROXY_TEST_TIMEOUT = 3              # Proxy testing timeout (seconds)
+MAX_CONCURRENT_DOWNLOADS = 3        # Maximum concurrent downloads
 
-# 下载配置
-DOWNLOAD_DIR = "downloads"    # 下载目录
-MAX_CONCURRENT_DOWNLOADS = 3  # 最大并发数
+# Download Configuration
+DOWNLOAD_DIR = "data/downloads"     # Download destination folder
+CHUNK_SIZE = 8192                   # Download chunk size (bytes)
+DOWNLOAD_TIMEOUT = 60               # Download timeout (seconds)
 
-# 爬虫配置
-REQUEST_DELAY = (1, 3)        # 请求延迟范围（秒）
-MAX_RETRIES = 5               # 最大重试次数
+# Rate Limiting
+REQUEST_DELAY = (1, 3)              # Random delay range between requests
+MAX_RETRIES = 3                     # Maximum retry attempts
+RETRY_DELAY = 1.5                   # Delay between retries (seconds)
 ```
 
-## 🗄️ 数据库
+## 📁 File Organization
 
-使用SQLite存储下载状态，位于 `data/downloads.db`
-
-### 主要数据表：
-
-- `categories`: 分类信息
-- `reports`: 报告列表
-- `downloads`: 下载记录
-- `extractions`: 解压记录
-
-### 报告状态：
-
-- `pending`: 待获取下载链接
-- `ready`: 准备下载
-- `downloaded`: 已下载
-- `failed`: 失败
-- `no_download_url`: 没有下载链接
-
-## 📋 日志
-
-日志文件位于 `logs/` 目录：
-
-- `app_YYYY-MM-DD.log`: 完整日志
-- `error_YYYY-MM-DD.log`: 错误日志
-
-## 🔧 高级功能
-
-### 断点续传
-
-程序会自动检测未完成的下载并继续：
-
-```bash
-# 正常下载（支持断点续传）
-python main.py --stage4 --max-reports 100
-
-# 强制重新下载
-python main.py --stage4 --max-reports 100 --force
+Downloaded reports are organized by category:
+```
+data/downloads/
+├── Economic Reports/
+│   ├── China Local Public Data Report/
+│   │   ├── 2025_China_Local_Public_Data_Report.zip
+│   │   └── [extracted files]
+│   └── Another Report/
+├── Artificial Intelligence/
+│   └── ...
+└── Other Categories/
 ```
 
-### 并发下载
+## 🗄️ Database Schema
 
+The application uses SQLite to track state:
+
+- `categories`: Category information (ID, name, URL)
+- `reports`: Report details (title, URL, category, status)
+- `downloads`: Download records (file path, size, timestamp)
+- `extractions`: Archive extraction logs
+
+Report Status Values:
+- `pending`: Awaiting download link retrieval
+- `ready`: Download link available
+- `downloaded`: Successfully downloaded
+- `failed`: Download attempt failed
+- `no_download_url`: No download URL found
+
+## 🔧 Advanced Features
+
+### Resumable Downloads
+Interrupted downloads automatically resume from where they left off:
 ```bash
-# 使用3个线程并发下载（在settings.py中配置）
-python main.py --stage4 --concurrent
+python main.py --stage4 --max-reports 100  # Will skip completed downloads
 ```
 
-### 只下载特定分类
-
+### Force Redownload
 ```bash
-# 查看所有分类ID（在settings.py中）
-grep "CATEGORY_NAMES" config/settings.py
-
-# 下载经济报告（ID=34）
-python main.py --full --categories 34 --max-pages 10
+python main.py --stage4 --max-reports 10 --force  # Re-download existing files
 ```
 
-## ⚠️ 注意事项
-
-1. **首次运行**: 建议先用 `--max-pages 2 --max-reports 10` 测试
-2. **代理配置**: 如果代理不稳定，可以用 `--no-proxy` 不使用代理
-3. **磁盘空间**: 确保有足够的磁盘空间（每个报告通常几MB到几十MB）
-4. **网络限制**: 建议设置合理的延迟，避免被封（在settings.py中配置）
-5. **中断恢复**: 程序被中断后可以继续运行，会自动跳过已下载的文件
-
-## 🐛 常见问题
-
-### 1. 代理连接失败
-
+### Concurrent Downloads
 ```bash
-# 检查代理配置文件是否正确
-ls config/clash_config.yaml
+python main.py --stage4 --concurrent  # Use multiple threads
+```
 
-# 或者不使用代理
+### Statistics
+```bash
+python main.py --stats  # Display current download statistics
+```
+
+## 🛡️ Anti-Detection Measures
+
+- **Fake Headers**: Browser-like headers prevent bot detection
+- **Random Delays**: Natural-looking request timing
+- **Session Management**: Proper cookie handling
+- **Proxy Rotation**: Automatic node switching on failures
+- **Referrer Handling**: Correct referer headers for anti-hotlinking
+
+## 📈 Monitoring & Logging
+
+Log files are maintained in the `logs/` directory:
+- `app_YYYY-MM-DD.log`: General application logs
+- `error_YYYY-MM-DD.log`: Error-specific logs
+
+Monitor in real-time:
+```bash
+tail -f logs/app_*.log
+tail -f logs/error_*.log
+```
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+#### Proxy Connection Failures
+```bash
+# Verify proxy configuration
+ls src/config/clash_config.yaml
+
+# Run without proxy
 python main.py --full --no-proxy
 ```
 
-### 2. 下载速度慢
-
+#### Slow Downloads
 ```bash
-# 使用并发下载
+# Enable concurrent downloads
 python main.py --stage4 --concurrent
 
-# 或者选择更快的代理节点（程序会自动测速选择）
+# Adjust concurrent download count in settings
 ```
 
-### 3. 某些报告下载失败
-
+#### Reports Failing to Download
 ```bash
-# 查看错误日志
+# Check error logs
 tail -f logs/error_*.log
 
-# 重新尝试失败的报告
-python main.py --stage4 --force
+# Retry failed downloads
+python main.py --retry
 ```
 
-### 4. 数据库损坏
-
+#### Database Corruption
 ```bash
-# 删除数据库重新开始
+# Reset database (WARNING: Loses all progress)
 rm data/downloads.db
 python main.py --full
 ```
 
-## 📊 性能优化
+## 💡 Best Practices
 
-1. **并发下载**: 使用 `--concurrent` 参数
-2. **代理选择**: 程序会自动选择最快的代理节点
-3. **断点续传**: 避免重复下载
-4. **智能去重**: 自动跳过已下载的文件
+1. **Start Small**: Begin with limited pages/reports for testing
+2. **Monitor Logs**: Watch logs during initial runs
+3. **Proxy Health**: Ensure Clash is running and nodes are responsive
+4. **Disk Space**: Monitor available space during large downloads
+5. **Rate Limits**: Respect delays to avoid being blocked
+6. **Resume Capability**: Interrupted runs can be resumed safely
 
-## 🔐 安全性
+## 📋 Roadmap
 
-- 使用fake-headers模拟真实浏览器
-- 随机延迟避免被识别为机器人
-- 支持代理隐藏真实IP
-- 自动重试处理网络错误
+- [ ] Web-based GUI interface
+- [ ] Docker containerization
+- [ ] Enhanced scheduling capabilities
+- [ ] Notification system
+- [ ] More download sources
+- [ ] Improved error recovery
 
-## 📈 监控
+## 🤝 Contributing
 
+Contributions are welcome! Please submit issues and pull requests.
+
+### Development Setup
 ```bash
-# 查看实时日志
-tail -f logs/app_*.log
+# Fork and clone your repository
+git clone https://github.com/yourusername/ipoipo-downloader.git
+cd ipoipo-downloader
 
-# 查看错误日志
-tail -f logs/error_*.log
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# 查看数据库统计
-python main.py --stats
+# Install in development mode
+pip install -e .
 ```
 
-## 🤝 贡献
+## 📄 License
 
-欢迎提交Issue和Pull Request！
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 📄 许可证
+## ⚠️ Disclaimer
 
-MIT License
+This tool is designed for educational and personal use only. Users are responsible for ensuring compliance with:
+- Website terms of service
+- Copyright laws
+- Local regulations regarding data scraping
+- Fair use principles
+
+Use responsibly and ethically.
+
+---
+
+<div align="center">
+
+**Made with ❤️ for financial research enthusiasts**
+
+⭐ Star this repository if it helped you!
+
+</div>
