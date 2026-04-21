@@ -1,6 +1,5 @@
 """Dual-output logger: colored console + structured JSON file."""
 import json
-import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -71,6 +70,13 @@ class Logger:
         if self._file:
             self._file.close()
             self._file = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+        return False
 
 
 def get_logger(module_name: str, jsonl_path: str = None) -> Logger:
