@@ -67,6 +67,15 @@ class Scraper:
                 if report:
                     reports.append(report)
             return reports
+        except requests.exceptions.ProxyError as e:
+            self.log.error(f"Proxy error on {url}: {e}")
+            raise  # Re-raise proxy errors so caller can handle them
+        except requests.exceptions.ConnectionError as e:
+            if "refused" in str(e).lower() or "proxy" in str(e).lower():
+                self.log.error(f"Connection refused (proxy down?) on {url}: {e}")
+                raise
+            self.log.error(f"Connection error on {url}: {e}")
+            return []
         except Exception as e:
             self.log.error(f"Failed to scrape page: {url} — {e}")
             return []
@@ -118,10 +127,24 @@ class Scraper:
         self.log.info(f"Stage 2: Scraping category:{category_id} {category_name} (from page {start_page})")
         all_reports = []
         page = start_page
+        proxy_failures = 0
+        max_proxy_retries = 5
         while True:
             url = CATEGORY_PAGE_URL.format(category_id) if page == 1 else CATEGORY_PAGE_PAGINATED.format(category_id, page)
             self.log.info(f"  Page {page}: {url}")
-            reports = self.scrape_page(url)
+            try:
+                reports = self.scrape_page(url)
+                proxy_failures = 0
+            except (requests.exceptions.ProxyError, requests.exceptions.ConnectionError) as e:
+                proxy_failures += 1
+                if proxy_failures >= max_proxy_retries:
+                    self.log.error(f"Proxy failed {proxy_failures} times, stopping category {category_id}")
+                    break
+                wait = min(proxy_failures * 5, 30)
+                self.log.warn(f"Proxy error (attempt {proxy_failures}/{max_proxy_retries}), waiting {wait}s before retry...")
+                time.sleep(wait)
+                continue
+
             if not reports:
                 self.log.info(f"  Page {page} has no data, stopping")
                 break
