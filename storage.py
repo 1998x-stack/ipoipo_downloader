@@ -108,6 +108,37 @@ class Storage:
                 results.append(state)
         return results
 
+    def get_reports_by_category(self, category_id: str) -> list:
+        """Get all reports for a category (latest state per post_id)."""
+        lines = self._read_lines("reports")
+        states = {}
+        for line in lines:
+            try:
+                data = json.loads(line)
+                if data.get("category_id") == category_id and "post_id" in data:
+                    states[data["post_id"]] = data
+            except json.JSONDecodeError:
+                continue
+        return list(states.values())
+
+    def get_category_report_count(self, category_id: str) -> int:
+        """Count unique reports for a category."""
+        lines = self._read_lines("reports")
+        post_ids = set()
+        for line in lines:
+            try:
+                data = json.loads(line)
+                if data.get("category_id") == category_id and "post_id" in data:
+                    post_ids.add(data["post_id"])
+            except json.JSONDecodeError:
+                continue
+        return len(post_ids)
+
+    def is_report_downloaded(self, post_id: str) -> bool:
+        """Check if a report has been successfully downloaded."""
+        state = self.get_state("reports", post_id)
+        return state is not None and state.get("type") == "download_completed"
+
     def get_stats(self) -> dict:
         """Get overall statistics."""
         stats = {"total_categories": 0, "total_reports": 0, "total_downloads": 0, "by_status": {}}

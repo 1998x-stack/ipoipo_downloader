@@ -25,6 +25,7 @@ def main():
     parser.add_argument("--category", type=str, help="Category ID")
     parser.add_argument("--no-proxy", action="store_true", help="Disable proxy")
     parser.add_argument("--keep-zip", action="store_true", help="Keep ZIP after extraction")
+    parser.add_argument("--resume", action="store_true", help="Resume from last checkpoint (skip completed)")
     args = parser.parse_args()
 
     if not any([args.full, args.stage1, args.stage2, args.stage3, args.stage4, args.retry, args.extract, args.stats]):
@@ -57,23 +58,30 @@ def main():
             log.info(f"By status: {stats['by_status']}")
 
         if args.stage1:
-            scraper.scrape_categories()
+            scraper.scrape_categories(resume=args.resume)
 
         if args.stage2:
             if args.category:
                 cat = storage.get_state("categories", args.category)
                 if cat:
-                    scraper.scrape_category(cat["category_id"], cat["category_name"], max_pages=args.max_pages)
+                    existing = storage.get_category_report_count(args.category)
+                    if args.resume and existing > 0:
+                        log.info(f"Category {args.category} already has {existing} reports, skipping")
+                    else:
+                        scraper.scrape_category(cat["category_id"], cat["category_name"], max_pages=args.max_pages)
                 else:
                     log.error(f"Category {args.category} not found. Run --stage1 first.")
             else:
-                scraper.scrape_all_categories(max_pages=args.max_pages)
+                scraper.scrape_all_categories(max_pages=args.max_pages, resume=args.resume)
 
         if args.stage3:
             scraper.process_pending_reports(limit=args.limit)
 
         if args.stage4:
             ready = storage.query_by_status("reports", "ready")
+            if args.resume:
+                # Also filter out reports that are already downloaded on disk
+                ready = [r for r in ready if not storage.is_report_downloaded(r["post_id"])]
             if args.category:
                 ready = [r for r in ready if r.get("category_id") == args.category]
                 log.info(f"Filtered to category {args.category}: {len(ready)} reports")
@@ -98,10 +106,15 @@ def main():
             dl.extract_downloaded_zips(max_reports=args.max_reports, keep_zip=args.keep_zip, category=args.category)
 
         if args.full:
-            scraper.scrape_categories()
-            scraper.scrape_all_categories(max_pages=args.max_pages)
+            scraper.scrape_categories(resume=args.resume)
+            scraper.scrape_all_categories(max_pages=args.max_pages, resume=args.resume)
             scraper.process_pending_reports(limit=args.limit)
-            dl.download_all_ready(max_reports=args.max_reports, keep_zip=args.keep_zip)
+            ready = storage.query_by_status("reports", "ready")
+            if args.resume:
+                ready = [r for r in ready if not storage.is_report_downloaded(r["post_id"])]
+            if args.max_reports:
+                ready = ready[:args.max_reports]
+            dl.download_all_ready(max_reports=len(ready), keep_zip=args.keep_zip, reports=ready)
 
         if not args.stats:
             stats = storage.get_stats()

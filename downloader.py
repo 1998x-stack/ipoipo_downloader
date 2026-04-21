@@ -112,18 +112,30 @@ class Downloader:
             self.log.warn(f"No download URL for {post_id}")
             return False
 
+        # Check storage state first
+        if self.storage.is_report_downloaded(post_id):
+            self.log.info(f"Already downloaded (storage): {post_id} {title[:40]}")
+            return True
+
         download_page_url = self.get_download_page_url(post_id)
         cat_dir = self.get_category_dir(category_id, category_name)
         zip_filename = os.path.basename(urlparse(zip_url).path)
         zip_path = cat_dir / clean_filename(zip_filename)
 
-        # Check if already downloaded
+        # Check if file already exists on disk
         doc_pattern = f"{extract_timestamp_from_zip(zip_filename)}_{clean_filename(title)}"
         existing = list(cat_dir.glob(f"{doc_pattern[:20]}*"))
         if existing:
             for f in existing:
                 if f.stat().st_size > MIN_VALID_FILE_SIZE:
-                    self.log.info(f"Already downloaded: {f.name}")
+                    self.log.info(f"Already downloaded (disk): {f.name}")
+                    # Update storage state to match
+                    self.storage.append("reports", {
+                        "type": "download_completed",
+                        "post_id": post_id,
+                        "file_path": str(cat_dir),
+                        "file_size": f.stat().st_size,
+                    })
                     return True
 
         self.log.info(f"Downloading: {title[:40]}")

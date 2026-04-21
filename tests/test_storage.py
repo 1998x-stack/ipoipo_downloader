@@ -93,6 +93,34 @@ class TestStorage(unittest.TestCase):
         state = storage2.get_state("reports", "1")
         self.assertEqual(state["title"], "Updated")
 
+    def test_get_reports_by_category(self):
+        self._append_report(type="report_found", post_id="1", title="A", category_id="85")
+        self._append_report(type="report_found", post_id="2", title="B", category_id="7")
+        self._append_report(type="url_found", post_id="1", download_url="http://x.zip")
+        self.storage.close()
+        reports = self.storage.get_reports_by_category("85")
+        self.assertEqual(len(reports), 1)
+        self.assertEqual(reports[0]["post_id"], "1")
+
+    def test_get_category_report_count(self):
+        self._append_report(type="report_found", post_id="1", title="A", category_id="85")
+        self._append_report(type="report_found", post_id="2", title="B", category_id="85")
+        self._append_report(type="report_found", post_id="3", title="C", category_id="7")
+        self.storage.close()
+        self.assertEqual(self.storage.get_category_report_count("85"), 2)
+        self.assertEqual(self.storage.get_category_report_count("7"), 1)
+        self.assertEqual(self.storage.get_category_report_count("99"), 0)
+
+    def test_is_report_downloaded(self):
+        self._append_report(type="report_found", post_id="1", title="A")
+        self._append_report(type="url_found", post_id="1", download_url="http://x.zip")
+        self._append_report(type="download_completed", post_id="1", file_path="/x.pdf")
+        self._append_report(type="report_found", post_id="2", title="B")
+        self.storage.close()
+        self.assertTrue(self.storage.is_report_downloaded("1"))
+        self.assertFalse(self.storage.is_report_downloaded("2"))
+        self.assertFalse(self.storage.is_report_downloaded("999"))
+
 
 if __name__ == "__main__":
     unittest.main()

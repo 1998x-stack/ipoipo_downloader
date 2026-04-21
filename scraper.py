@@ -29,11 +29,18 @@ class Scraper:
 
     # ── Stage 1: Categories ──
 
-    def scrape_categories(self) -> List[Dict]:
+    def scrape_categories(self, resume: bool = False) -> List[Dict]:
         """Stage 1: Scrape all categories and store them."""
         self.log.info("Stage 1: Scraping categories")
+        existing_ids = set()
+        if resume:
+            cat_lines = self.storage._read_lines("categories")
+            existing_ids = {json.loads(l)["category_id"] for l in cat_lines if l.strip()}
+            self.log.info(f"  Found {len(existing_ids)} existing categories, skipping")
         categories = []
         for cat_id, cat_name in CATEGORY_NAMES.items():
+            if resume and cat_id in existing_ids:
+                continue
             url = CATEGORY_PAGE_URL.format(cat_id)
             self.storage.append("categories", {
                 "type": "category",
@@ -107,10 +114,10 @@ class Scraper:
             self.log.error(f"Failed to parse report card: {e}")
             return None
 
-    def scrape_category(self, category_id: str, category_name: str, max_pages: int = None) -> List[Dict]:
-        self.log.info(f"Stage 2: Scraping category:{category_id} {category_name}")
+    def scrape_category(self, category_id: str, category_name: str, max_pages: int = None, start_page: int = 1) -> List[Dict]:
+        self.log.info(f"Stage 2: Scraping category:{category_id} {category_name} (from page {start_page})")
         all_reports = []
-        page = 1
+        page = start_page
         while True:
             url = CATEGORY_PAGE_URL.format(category_id) if page == 1 else CATEGORY_PAGE_PAGINATED.format(category_id, page)
             self.log.info(f"  Page {page}: {url}")
@@ -118,6 +125,7 @@ class Scraper:
             if not reports:
                 self.log.info(f"  Page {page} has no data, stopping")
                 break
+            new_count = 0
             for r in reports:
                 self.storage.append("reports", {
                     "type": "report_found",
@@ -129,24 +137,34 @@ class Scraper:
                     "view_count": r["view_count"],
                     "publish_date": r["publish_date"],
                 })
+                new_count += 1
                 self.log.ok(f"  report:{r['post_id']} {r['title'][:40]}")
             all_reports.extend(reports)
             if max_pages and page >= max_pages:
                 break
             page += 1
             sleep_jitter(*REQUEST_DELAY)
-        self.log.info(f"  Total reports for {category_name}: {len(all_reports)}")
+        self.log.info(f"  Total reports for {category_name}: {len(all_reports)} ({new_count} new)")
         return all_reports
 
-    def scrape_all_categories(self, max_pages: int = None):
+    def scrape_all_categories(self, max_pages: int = None, resume: bool = False):
         """Stage 2: Scrape report lists for all categories."""
         cat_lines = self.storage._read_lines("categories")
         if not cat_lines:
             self.scrape_categories()
             cat_lines = self.storage._read_lines("categories")
-        for line in cat_lines:
+        total_cats = len(cat_lines)
+        for i, line in enumerate(cat_lines, 1):
             cat = json.loads(line)
-            self.scrape_category(cat["category_id"], cat["category_name"], max_pages=max_pages)
+            cat_id = cat["category_id"]
+            cat_name = cat["category_name"]
+            if resume:
+                existing = self.storage.get_category_report_count(cat_id)
+                if existing > 0:
+                    self.log.info(f"[{i}/{total_cats}] Skipping category:{cat_id} {cat_name} ({existing} reports already)")
+                    continue
+            self.log.info(f"[{i}/{total_cats}] Processing category:{cat_id} {cat_name}")
+            self.scrape_category(cat_id, cat_name, max_pages=max_pages)
 
     # ── Stage 3: Download URLs ──
 
