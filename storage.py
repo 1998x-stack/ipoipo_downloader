@@ -1,0 +1,148 @@
+"""JSONL storage: append-only event log with state derivation."""
+import json
+import os
+from pathlib import Path
+from typing import Optional
+
+
+# Event type → derived status mapping
+STATUS_MAP = {
+    "report_found": "pending",
+    "url_found": "ready",
+    "download_started": "downloading",
+    "download_completed": "downloaded",
+    "download_failed": "failed",
+}
+
+FILE_NAMES = {
+    "categories": "categories.jsonl",
+    "reports": "reports.jsonl",
+    "downloads": "downloads.jsonl",
+}
+
+
+class Storage:
+    """JSONL storage with append, read, dedup, and query by status."""
+
+    def __init__(self, data_dir: str):
+        self.data_dir = Path(data_dir)
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+        self._files = {}  # file_key → file handle
+        self._seen_ids = {}  # file_key → set of IDs
+
+    def _file_path(self, file_key: str) -> Path:
+        return self.data_dir / FILE_NAMES.get(file_key, f"{file_key}.jsonl")
+
+    def _get_handle(self, file_key: str):
+        if file_key not in self._files:
+            path = self._file_path(file_key)
+            self._files[file_key] = open(path, "a", encoding="utf-8")
+        return self._files[file_key]
+
+    def _load_seen_ids(self, file_key: str):
+        if file_key in self._seen_ids:
+            return
+        self._seen_ids[file_key] = set()
+        path = self._file_path(file_key)
+        if path.exists():
+            for line in path.read_text(encoding="utf-8").splitlines():
+                if line.strip():
+                    try:
+                        data = json.loads(line)
+                        if "post_id" in data:
+                            self._seen_ids[file_key].add(data["post_id"])
+                        elif "category_id" in data:
+                            self._seen_ids[file_key].add(data["category_id"])
+                    except json.JSONDecodeError:
+                        continue
+
+    def append(self, file_key: str, data: dict):
+        """Append an event to the JSONL file."""
+        self._load_seen_ids(file_key)
+        handle = self._get_handle(file_key)
+        handle.write(json.dumps(data, ensure_ascii=False) + "\n")
+        handle.flush()
+        if "post_id" in data:
+            self._seen_ids[file_key].add(data["post_id"])
+        elif "category_id" in data:
+            self._seen_ids[file_key].add(data["category_id"])
+
+    def _read_lines(self, file_key: str):
+        """Read all lines from a JSONL file."""
+        path = self._file_path(file_key)
+        if not path.exists():
+            return []
+        with open(path, encoding="utf-8") as f:
+            return [line for line in f.readlines() if line.strip()]
+
+    def get_state(self, file_key: str, entity_id: str) -> Optional[dict]:
+        """Get the last event state for an entity."""
+        lines = self._read_lines(file_key)
+        last_state = None
+        for line in lines:
+            try:
+                data = json.loads(line)
+                if data.get("post_id") == entity_id or data.get("category_id") == entity_id:
+                    last_state = data
+            except json.JSONDecodeError:
+                continue
+        return last_state
+
+    def query_by_status(self, file_key: str, status: str) -> list:
+        """Query all entities with a given derived status."""
+        lines = self._read_lines(file_key)
+        # Group by post_id, keep last event
+        states = {}
+        for line in lines:
+            try:
+                data = json.loads(line)
+                if "post_id" in data:
+                    states[data["post_id"]] = data
+            except json.JSONDecodeError:
+                continue
+
+        results = []
+        for post_id, state in states.items():
+            derived = STATUS_MAP.get(state.get("type", ""), "")
+            if derived == status:
+                results.append(state)
+        return results
+
+    def get_stats(self) -> dict:
+        """Get overall statistics."""
+        stats = {"total_categories": 0, "total_reports": 0, "total_downloads": 0, "by_status": {}}
+
+        # Categories
+        cat_lines = self._read_lines("categories")
+        stats["total_categories"] = len(cat_lines)
+
+        # Reports
+        report_lines = self._read_lines("reports")
+        states = {}
+        for line in report_lines:
+            try:
+                data = json.loads(line)
+                if "post_id" in data:
+                    states[data["post_id"]] = data
+            except json.JSONDecodeError:
+                continue
+        stats["total_reports"] = len(states)
+
+        # Count by status
+        status_counts = {}
+        for state in states.values():
+            derived = STATUS_MAP.get(state.get("type", ""), "unknown")
+            status_counts[derived] = status_counts.get(derived, 0) + 1
+        stats["by_status"] = status_counts
+
+        # Downloads
+        dl_lines = self._read_lines("downloads")
+        stats["total_downloads"] = len(dl_lines)
+
+        return stats
+
+    def close(self):
+        """Close all file handles."""
+        for f in self._files.values():
+            f.close()
+        self._files.clear()
