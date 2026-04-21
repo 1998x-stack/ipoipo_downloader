@@ -82,12 +82,14 @@ class TestStorage(unittest.TestCase):
     def test_dedup_on_startup(self):
         self._append_report(type="report_found", post_id="1", title="A")
         self.storage.close()
-        # Create new storage instance — should dedup from file
+        # Create new storage instance — should load seen_ids from file
         storage2 = Storage(self.temp_dir)
-        self._append_report.__func__(self, type="report_found", post_id="1", title="Updated")
+        storage2.append("reports", {"type": "report_found", "post_id": "1", "title": "Updated"})
         storage2.close()
         lines = list(storage2._read_lines("reports"))
-        # Should have 2 lines (append-only), but get_state returns latest
+        # Append-only: 2 lines on disk
+        self.assertEqual(len(lines), 2)
+        # But get_state returns latest event
         state = storage2.get_state("reports", "1")
         self.assertEqual(state["title"], "Updated")
 
