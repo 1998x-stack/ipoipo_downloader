@@ -38,7 +38,7 @@ class TestDownloader(unittest.TestCase):
 
     @patch.object(Downloader, "_download_zip")
     def test_download_report_emits_event(self, mock_download):
-        mock_download.return_value = (True, "/tmp/test.pdf", 1000)
+        mock_download.return_value = (True, 1000)
         self.storage.append("reports", {
             "type": "report_found", "post_id": "1", "title": "Test", "category_id": "85"
         })

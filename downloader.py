@@ -1,7 +1,5 @@
 """Downloader: Stage 4 — ZIP download, extract, rename."""
 import os
-import re
-import time
 import zipfile
 from pathlib import Path
 from typing import Optional, Tuple
@@ -145,7 +143,12 @@ class Downloader:
             if not ok:
                 self._consecutive_failures += 1
                 if attempt < max_attempts:
-                    if self._consecutive_failures >= 2 or self._switch_proxy_and_retry():
+                    if self._consecutive_failures >= 2:
+                        self._switch_proxy_and_retry()
+                        self._consecutive_failures = 0
+                        continue
+                    if self._switch_proxy_and_retry():
+                        self._consecutive_failures = 0
                         continue
                 self.log.error(f"Download failed: {post_id}")
                 self.storage.append("reports", {
@@ -207,11 +210,12 @@ class Downloader:
         if max_reports:
             zips = zips[:max_reports]
         for zip_path in zips:
-            parts = zip_path.relative_to(DOWNLOAD_DIR).parts
-            category_part = parts[0] if parts else "unknown"
-            cat_id, *cat_name = category_part.split("_", 1)
-            cat_name = cat_name[0] if cat_name else category_part
-            if self._extract_zip(zip_path, zip_path.parent, cat_name):
+            # Try to find report title from storage
+            title = zip_path.stem
+            state = self.storage.get_state("reports", title)
+            if state and "title" in state:
+                title = state["title"]
+            if self._extract_zip(zip_path, zip_path.parent, title):
                 self.log.ok(f"Extracted: {zip_path.name}")
                 if not keep_zip:
                     zip_path.unlink()
