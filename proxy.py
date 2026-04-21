@@ -3,6 +3,7 @@ import yaml
 import socket
 import random
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Optional, Dict
 from dataclasses import dataclass
 from logger import get_logger
@@ -65,7 +66,6 @@ class ProxyManager:
 
     def test_all_nodes(self, max_workers: int = 10):
         self.log.info(f"Testing {len(self.nodes)} nodes...")
-        from concurrent.futures import ThreadPoolExecutor, as_completed
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = {executor.submit(self.test_node, n): n for n in self.nodes}
             for future in as_completed(futures):
@@ -77,7 +77,7 @@ class ProxyManager:
         available = [n for n in self.nodes if n.latency < float("inf")]
         self.log.info(f"Available nodes: {len(available)}/{len(self.nodes)}")
 
-    def select_random(self, max_latency: int = None) -> ProxyNode:
+    def select_random(self, max_latency: Optional[int] = None) -> ProxyNode:
         threshold = max_latency or self.max_latency
         available = [n for n in self.nodes if n.latency < threshold and n.fail_count < 3]
         if not available:
