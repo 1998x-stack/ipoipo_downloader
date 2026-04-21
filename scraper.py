@@ -1,0 +1,224 @@
+"""Scraper: Stage 1-3 — categories, report lists, download URLs."""
+import re
+import time
+import random
+from typing import List, Dict, Optional
+from bs4 import BeautifulSoup
+import requests
+from config import (
+    CATEGORY_NAMES, CATEGORY_PAGE_URL, CATEGORY_PAGE_PAGINATED,
+    DOWNLOAD_URL, REQUEST_DELAY, REQUEST_TIMEOUT, MAX_RETRIES,
+    USE_PROXY, PROXY_CONFIG_PATH,
+)
+from utils.headers import get_browser_headers
+from utils.helpers import sleep_jitter
+
+
+class Scraper:
+    def __init__(self, storage, log, use_proxy: bool = USE_PROXY, proxy_manager=None):
+        self.storage = storage
+        self.log = log
+        self.use_proxy = use_proxy
+        self.proxy_manager = proxy_manager
+        self.session = requests.Session()
+        self.session.headers.update(get_browser_headers())
+        if use_proxy and proxy_manager:
+            self.session.proxies.update(proxy_manager.get_local_proxy())
+
+    def close(self):
+        self.session.close()
+
+    # ── Stage 1: Categories ──
+
+    def scrape_all_categories(self) -> List[Dict]:
+        self.log.info("Stage 1: Scraping categories")
+        categories = []
+        for cat_id, cat_name in CATEGORY_NAMES.items():
+            url = CATEGORY_PAGE_URL.format(cat_id)
+            self.storage.append("categories", {
+                "type": "category",
+                "category_id": cat_id,
+                "category_name": cat_name,
+                "url": url,
+            })
+            self.log.ok(f"category:{cat_id} {cat_name}")
+            categories.append({"category_id": cat_id, "category_name": cat_name, "url": url})
+        self.log.info(f"Total categories: {len(categories)}")
+        return categories
+
+    # ── Stage 2: Report Lists ──
+
+    def scrape_page(self, url: str) -> List[Dict]:
+        try:
+            resp = self.session.get(url, timeout=REQUEST_TIMEOUT)
+            resp.raise_for_status()
+            soup = BeautifulSoup(resp.text, "lxml")
+            cards = soup.find_all("div", class_="wapost card")
+            reports = []
+            for card in cards:
+                report = self.parse_report_card(card)
+                if report:
+                    reports.append(report)
+            return reports
+        except Exception as e:
+            self.log.error(f"Failed to scrape page: {url} — {e}")
+            return []
+
+    def parse_report_card(self, card) -> Optional[Dict]:
+        try:
+            h2 = card.find("h2", class_="multi-ellipsis")
+            if not h2:
+                return None
+            link = h2.find("a")
+            if not link:
+                return None
+            title = link.get("title", "").strip()
+            detail_url = link.get("href", "").strip()
+            match = re.search(r"/post/(\d+)\.html", detail_url)
+            if not match:
+                return None
+            post_id = match.group(1)
+            img = card.find("img", class_="img-cover")
+            thumbnail_url = img.get("src", "") if img else ""
+            text_p = card.find("p", class_="text")
+            description = text_p.get_text(strip=True) if text_p else ""
+            count_div = card.find("div", class_="count")
+            view_count = 0
+            publish_date = ""
+            if count_div:
+                view_span = count_div.find("span", class_="view-num")
+                if view_span:
+                    m = re.search(r"\d+", view_span.get_text(strip=True))
+                    if m:
+                        view_count = int(m.group())
+                edit_span = count_div.find("span", class_="edit")
+                if edit_span:
+                    publish_date = edit_span.get_text(strip=True)
+            return {
+                "post_id": post_id,
+                "title": title,
+                "detail_url": detail_url,
+                "thumbnail_url": thumbnail_url,
+                "description": description,
+                "view_count": view_count,
+                "publish_date": publish_date,
+            }
+        except Exception as e:
+            self.log.error(f"Failed to parse report card: {e}")
+            return None
+
+    def scrape_category(self, category_id: str, category_name: str, max_pages: int = None) -> List[Dict]:
+        self.log.info(f"Stage 2: Scraping category:{category_id} {category_name}")
+        all_reports = []
+        page = 1
+        while True:
+            url = CATEGORY_PAGE_URL.format(category_id) if page == 1 else CATEGORY_PAGE_PAGINATED.format(category_id, page)
+            self.log.info(f"  Page {page}: {url}")
+            reports = self.scrape_page(url)
+            if not reports:
+                self.log.info(f"  Page {page} has no data, stopping")
+                break
+            for r in reports:
+                self.storage.append("reports", {
+                    "type": "report_found",
+                    "post_id": r["post_id"],
+                    "category_id": category_id,
+                    "title": r["title"],
+                    "detail_url": r["detail_url"],
+                    "thumbnail_url": r["thumbnail_url"],
+                    "view_count": r["view_count"],
+                    "publish_date": r["publish_date"],
+                })
+                self.log.ok(f"  report:{r['post_id']} {r['title'][:40]}")
+            all_reports.extend(reports)
+            if max_pages and page >= max_pages:
+                break
+            page += 1
+            sleep_jitter(*REQUEST_DELAY)
+        self.log.info(f"  Total reports for {category_name}: {len(all_reports)}")
+        return all_reports
+
+    def scrape_all_categories(self, max_pages: int = None):
+        categories = self.storage._read_lines("categories")
+        if not categories:
+            self.scrape_all_categories()
+            categories = self.storage._read_lines("categories")
+        import json
+        for line in categories:
+            cat = json.loads(line)
+            self.scrape_category(cat["category_id"], cat["category_name"], max_pages=max_pages)
+
+    # ── Stage 3: Download URLs ──
+
+    def get_download_page_url(self, post_id: str) -> str:
+        return DOWNLOAD_URL.format(post_id)
+
+    def extract_zip_url(self, html: str, base_url: str = None) -> Optional[str]:
+        from urllib.parse import urljoin
+        soup = BeautifulSoup(html, "lxml")
+        # Method 1: href ends with .zip
+        links = soup.find_all("a", href=re.compile(r"\.zip$", re.I))
+        if links:
+            return urljoin(base_url, links[0].get("href")) if base_url else links[0].get("href")
+        # Method 2: style with font-size + color
+        links = soup.find_all("a", style=re.compile(r"font-size.*color"))
+        for link in links:
+            href = link.get("href", "")
+            text = link.get_text(strip=True)
+            if ".zip" in href.lower() or ".zip" in text.lower():
+                return urljoin(base_url, href) if base_url else href
+        # Method 3: text contains .zip
+        for link in soup.find_all("a"):
+            text = link.get_text(strip=True)
+            if ".zip" in text.lower():
+                href = link.get("href", "")
+                if href:
+                    return urljoin(base_url, href) if base_url else href
+        # Method 4: regex
+        matches = re.findall(r'https?://[^\s<>"'']+.zip', html, re.I)
+        if matches:
+            return matches[0]
+        return None
+
+    def visit_download_page(self, post_id: str) -> tuple:
+        url = self.get_download_page_url(post_id)
+        try:
+            resp = self.session.get(url, timeout=REQUEST_TIMEOUT)
+            resp.raise_for_status()
+            return True, resp.text, url
+        except Exception as e:
+            self.log.error(f"Failed to visit download page for {post_id}: {e}")
+            return False, None, url
+
+    def process_pending_reports(self, limit: int = 100):
+        self.log.info("Stage 3: Processing pending reports for download URLs")
+        pending = self.storage.query_by_status("reports", "pending")
+        if limit:
+            pending = pending[:limit]
+        self.log.info(f"  Pending reports: {len(pending)}")
+        success = 0
+        fail = 0
+        for i, report in enumerate(pending):
+            post_id = report["post_id"]
+            title = report.get("title", "")
+            self.log.info(f"  [{i+1}/{len(pending)}] {title[:40]}")
+            ok, html, page_url = self.visit_download_page(post_id)
+            if not ok or not html:
+                fail += 1
+                continue
+            sleep_jitter(0.5, 1.0)
+            zip_url = self.extract_zip_url(html, base_url=page_url)
+            if zip_url:
+                self.storage.append("reports", {
+                    "type": "url_found",
+                    "post_id": post_id,
+                    "download_url": zip_url,
+                })
+                self.log.ok(f"  URL found: {post_id}")
+                success += 1
+            else:
+                self.log.warn(f"  No ZIP URL for {post_id}")
+                fail += 1
+            if i < len(pending) - 1:
+                sleep_jitter(1.5, 2.5)
+        self.log.info(f"  Stage 3 complete: {success} success, {fail} failed")
