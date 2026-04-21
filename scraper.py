@@ -1,8 +1,7 @@
 """Scraper: Stage 1-3 — categories, report lists, download URLs."""
+import json
 import re
-import time
-import random
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 from bs4 import BeautifulSoup
 import requests
 from config import (
@@ -30,7 +29,8 @@ class Scraper:
 
     # ── Stage 1: Categories ──
 
-    def scrape_all_categories(self) -> List[Dict]:
+    def scrape_categories(self) -> List[Dict]:
+        """Stage 1: Scrape all categories and store them."""
         self.log.info("Stage 1: Scraping categories")
         categories = []
         for cat_id, cat_name in CATEGORY_NAMES.items():
@@ -139,12 +139,12 @@ class Scraper:
         return all_reports
 
     def scrape_all_categories(self, max_pages: int = None):
-        categories = self.storage._read_lines("categories")
-        if not categories:
-            self.scrape_all_categories()
-            categories = self.storage._read_lines("categories")
-        import json
-        for line in categories:
+        """Stage 2: Scrape report lists for all categories."""
+        cat_lines = self.storage._read_lines("categories")
+        if not cat_lines:
+            self.scrape_categories()
+            cat_lines = self.storage._read_lines("categories")
+        for line in cat_lines:
             cat = json.loads(line)
             self.scrape_category(cat["category_id"], cat["category_name"], max_pages=max_pages)
 
@@ -180,7 +180,7 @@ class Scraper:
             return matches[0]
         return None
 
-    def visit_download_page(self, post_id: str) -> tuple:
+    def visit_download_page(self, post_id: str) -> Tuple[bool, Optional[str], str]:
         url = self.get_download_page_url(post_id)
         try:
             resp = self.session.get(url, timeout=REQUEST_TIMEOUT)
@@ -193,7 +193,7 @@ class Scraper:
     def process_pending_reports(self, limit: int = 100):
         self.log.info("Stage 3: Processing pending reports for download URLs")
         pending = self.storage.query_by_status("reports", "pending")
-        if limit:
+        if limit is not None:
             pending = pending[:limit]
         self.log.info(f"  Pending reports: {len(pending)}")
         success = 0

@@ -21,8 +21,7 @@ class TestScraper(unittest.TestCase):
         import shutil
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
-    @patch("scraper.requests.Session")
-    def test_parse_report_card(self, mock_session):
+    def test_parse_report_card(self):
         html = """
         <div class="wapost card">
             <h2 class="multi-ellipsis"><a href="https://ipoipo.cn/post/26028.html" title="Test Report">Test Report</a></h2>
