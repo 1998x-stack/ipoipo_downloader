@@ -10,9 +10,11 @@
 
 **Symptom:** `python main.py --full` scrapes every page of all 38 categories. Category 70 (TMT行业) alone has 53+ pages. Total estimated: 3000+ pages × 2-3s delay = 2+ hours.
 
-**Fix:** Always use `--max-pages` for testing:
+**Fix:** Always use `--max-pages` for testing, or `--resume` to continue from checkpoint:
 ```bash
 python main.py --full --max-pages 2 --max-reports 10
+# Or resume from where you left off:
+python main.py --full --resume
 ```
 
 ### 1.2 Proxy config must exist at `config/proxy.yaml`
@@ -154,9 +156,9 @@ if "text/html" in content_type.lower() and zip_url.endswith(".zip"):
 
 ### 6.1 Console output includes ANSI codes in redirected output
 
-**Symptom:** When running with `nohup` or redirecting to file, ANSI color codes are still emitted. The output log contains raw escape sequences like `\033[34m`.
+**Symptom:** When running with `nohup` or redirecting to file, ANSI color codes were emitted to the log file.
 
-**Fix:** Detect if stdout is a TTY and skip colors for file output. Not yet implemented.
+**Fixed (2026-04-22):** Logger now detects `sys.stdout.isatty()` and skips colors for non-TTY output. Existing running processes need restart to pick up the fix.
 
 ### 6.2 JSONL event log grows with every log call
 
@@ -186,8 +188,6 @@ if "text/html" in content_type.lower() and zip_url.endswith(".zip"):
 
 ---
 
-## 8. Downloader Gotchas
-
 ### 8.1 Consecutive failure counter resets after proxy switch
 
 **Fixed in this branch:** Previously, `_consecutive_failures` was not reset after a successful proxy switch, causing immediate re-switch on the next failure.
@@ -203,3 +203,29 @@ if "text/html" in content_type.lower() and zip_url.endswith(".zip"):
 **Code:** `cat_dir.glob(f"{doc_pattern[:20]}*")` — matches first 20 chars of the expected filename.
 
 **Risk:** Two reports with the same date and similar title prefixes could match the same existing file.
+
+---
+
+## 9. Resume/Checkpoint Gotchas
+
+### 9.1 `--resume` skips completed work at each stage
+
+**Stage 1**: Skips categories already in `categories.jsonl`.
+**Stage 2**: Skips categories that already have reports in `reports.jsonl`.
+**Stage 3**: Already skips non-pending reports (existing behavior).
+**Stage 4**: Checks both storage state (`download_completed`) AND disk file existence. If file exists but storage is out of sync, it updates storage and skips.
+
+### 9.2 Resume is per-stage, not per-page
+
+**Limitation:** Stage 2 resume skips entire categories, not individual pages. If a category was partially scraped (e.g., interrupted on page 30 of 50), `--resume` will skip it entirely since it already has some reports.
+
+**Workaround:** For partially scraped categories, run without `--resume` but with `--category` to re-scrape just that category:
+```bash
+python main.py --stage2 --category 70
+```
+
+### 9.3 Storage state can drift from disk
+
+**Scenario:** File was downloaded but process crashed before writing `download_completed` event.
+
+**Fix:** `download_report()` now checks disk first. If file exists with size > 1KB, it syncs storage state and skips.
