@@ -14,8 +14,6 @@ def clean_filename(name: str, max_length: int = 200) -> str:
     ext = path.suffix
 
     stem = re.sub(ILLEGAL_CHARS, "_", stem)
-    stem = stem.replace("（", "_").replace("）", "_")
-    stem = stem.replace("【", "_").replace("】", "_")
     stem = re.sub(r"[_\s.]+", "_", stem)
     stem = stem.strip("_. ")
 
@@ -32,8 +30,6 @@ def clean_filename(name: str, max_length: int = 200) -> str:
 def clean_foldername(name: str) -> str:
     """Clean a folder name (stricter than filename)."""
     name = re.sub(ILLEGAL_CHARS, "_", name)
-    name = name.replace("（", "_").replace("）", "_")
-    name = name.replace("【", "_").replace("】", "_")
     name = re.sub(r"[^\w\u4e00-\u9fff]+", "_", name)
     name = re.sub(r"_+", "_", name)
     name = name.strip("_ ")

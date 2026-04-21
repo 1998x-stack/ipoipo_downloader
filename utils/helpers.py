@@ -2,7 +2,7 @@
 import time
 import random
 import functools
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urlparse
 import re
 
 
