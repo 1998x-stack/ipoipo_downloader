@@ -2,7 +2,7 @@
 import unittest
 from utils.headers import get_browser_headers, get_download_headers
 from utils.sanitize import clean_filename, clean_foldername, extract_timestamp_from_zip, generate_doc_filename
-from utils.helpers import sleep_jitter, is_valid_url
+from utils.helpers import sleep_jitter, is_valid_url, extract_post_id
 
 
 class TestHeaders(unittest.TestCase):
@@ -73,6 +73,11 @@ class TestHelpers(unittest.TestCase):
         self.assertTrue(is_valid_url("https://example.com/path"))
         self.assertFalse(is_valid_url("not-a-url"))
         self.assertFalse(is_valid_url(""))
+
+    def test_extract_post_id(self):
+        self.assertEqual(extract_post_id("https://ipoipo.cn/post/26028.html"), "26028")
+        self.assertEqual(extract_post_id("https://ipoipo.cn/post/123.html"), "123")
+        self.assertEqual(extract_post_id("https://example.com"), "")
 
 
 if __name__ == "__main__":
