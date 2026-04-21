@@ -1,6 +1,7 @@
 """JSONL storage: append-only event log with state derivation."""
 import json
 import os
+import threading
 from pathlib import Path
 from typing import Optional
 
@@ -29,6 +30,7 @@ class Storage:
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self._files = {}  # file_key → file handle
         self._seen_ids = {}  # file_key → set of IDs
+        self._lock = threading.Lock()
 
     def _file_path(self, file_key: str) -> Path:
         return self.data_dir / FILE_NAMES.get(file_key, f"{file_key}.jsonl")
@@ -58,14 +60,15 @@ class Storage:
 
     def append(self, file_key: str, data: dict):
         """Append an event to the JSONL file."""
-        self._load_seen_ids(file_key)
-        handle = self._get_handle(file_key)
-        handle.write(json.dumps(data, ensure_ascii=False) + "\n")
-        handle.flush()
-        if "post_id" in data:
-            self._seen_ids[file_key].add(data["post_id"])
-        elif "category_id" in data:
-            self._seen_ids[file_key].add(data["category_id"])
+        with self._lock:
+            self._load_seen_ids(file_key)
+            handle = self._get_handle(file_key)
+            handle.write(json.dumps(data, ensure_ascii=False) + "\n")
+            handle.flush()
+            if "post_id" in data:
+                self._seen_ids[file_key].add(data["post_id"])
+            elif "category_id" in data:
+                self._seen_ids[file_key].add(data["category_id"])
 
     def _read_lines(self, file_key: str):
         """Read all lines from a JSONL file."""

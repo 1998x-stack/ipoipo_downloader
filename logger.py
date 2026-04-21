@@ -1,6 +1,7 @@
 """Dual-output logger: colored console + structured JSON file."""
 import json
 import sys
+import threading
 from datetime import datetime
 from pathlib import Path
 
@@ -27,6 +28,7 @@ class Logger:
         self.module_name = module_name
         self.jsonl_path = Path(jsonl_path) if jsonl_path else None
         self._is_tty = sys.stdout.isatty()
+        self._lock = threading.Lock()
         if self.jsonl_path:
             self.jsonl_path.parent.mkdir(parents=True, exist_ok=True)
             self._file = open(self.jsonl_path, "a", encoding="utf-8")
@@ -41,15 +43,16 @@ class Logger:
     def _write_json(self, level: str, msg: str, **kwargs):
         if not self._file:
             return
-        entry = {
-            "ts": datetime.now().isoformat(timespec="seconds"),
-            "level": level,
-            "module": self.module_name,
-            "msg": msg,
-        }
-        entry.update(kwargs)
-        self._file.write(json.dumps(entry, ensure_ascii=False) + "\n")
-        self._file.flush()
+        with self._lock:
+            entry = {
+                "ts": datetime.now().isoformat(timespec="seconds"),
+                "level": level,
+                "module": self.module_name,
+                "msg": msg,
+            }
+            entry.update(kwargs)
+            self._file.write(json.dumps(entry, ensure_ascii=False) + "\n")
+            self._file.flush()
 
     def _log(self, level: str, msg: str, **kwargs):
         console_msg = self._format_console(level, msg, **kwargs)

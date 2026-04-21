@@ -1,6 +1,7 @@
 """Scraper: Stage 1-3 — categories, report lists, download URLs."""
 import json
 import re
+import time
 from typing import List, Dict, Optional, Tuple
 from bs4 import BeautifulSoup
 import requests
