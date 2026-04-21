@@ -186,9 +186,9 @@ class Downloader:
         self.log.error(f"All attempts failed for {post_id}")
         return False
 
-    def download_all_ready(self, max_reports: int = None, keep_zip: bool = KEEP_ZIP) -> dict:
+    def download_all_ready(self, max_reports: int = None, keep_zip: bool = KEEP_ZIP, reports: list = None) -> dict:
         self.log.info("Stage 4: Downloading all ready reports")
-        ready = self.storage.query_by_status("reports", "ready")
+        ready = reports if reports is not None else self.storage.query_by_status("reports", "ready")
         if max_reports:
             ready = ready[:max_reports]
         self.log.info(f"  Ready reports: {len(ready)}")
@@ -204,9 +204,12 @@ class Downloader:
         self.log.info(f"  Stage 4 complete: {stats['success']} success, {stats['failed']} failed")
         return stats
 
-    def extract_downloaded_zips(self, max_reports: int = None, keep_zip: bool = True):
+    def extract_downloaded_zips(self, max_reports: int = None, keep_zip: bool = True, category: str = None):
         self.log.info("Extracting downloaded ZIPs")
         zips = list(DOWNLOAD_DIR.rglob("*.zip"))
+        if category:
+            zips = [z for z in zips if z.parent.name.startswith(f"{category}_")]
+            self.log.info(f"Filtered to category {category}: {len(zips)} ZIPs")
         if max_reports:
             zips = zips[:max_reports]
         for zip_path in zips:

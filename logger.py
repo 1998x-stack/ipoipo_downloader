@@ -1,5 +1,6 @@
 """Dual-output logger: colored console + structured JSON file."""
 import json
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -25,6 +26,7 @@ class Logger:
     def __init__(self, module_name: str, jsonl_path: str = None):
         self.module_name = module_name
         self.jsonl_path = Path(jsonl_path) if jsonl_path else None
+        self._is_tty = sys.stdout.isatty()
         if self.jsonl_path:
             self.jsonl_path.parent.mkdir(parents=True, exist_ok=True)
             self._file = open(self.jsonl_path, "a", encoding="utf-8")
@@ -51,7 +53,10 @@ class Logger:
 
     def _log(self, level: str, msg: str, **kwargs):
         console_msg = self._format_console(level, msg, **kwargs)
-        print(f"{self.COLORS.get(level, '')}{console_msg}{self.COLORS['reset']}", flush=True)
+        if self._is_tty:
+            print(f"{self.COLORS.get(level, '')}{console_msg}{self.COLORS['reset']}", flush=True)
+        else:
+            print(console_msg, flush=True)
         self._write_json(level, msg, **kwargs)
 
     def info(self, msg: str, **kwargs):

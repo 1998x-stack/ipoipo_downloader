@@ -60,13 +60,26 @@ def main():
             scraper.scrape_categories()
 
         if args.stage2:
-            scraper.scrape_all_categories(max_pages=args.max_pages)
+            if args.category:
+                cat = storage.get_state("categories", args.category)
+                if cat:
+                    scraper.scrape_category(cat["category_id"], cat["category_name"], max_pages=args.max_pages)
+                else:
+                    log.error(f"Category {args.category} not found. Run --stage1 first.")
+            else:
+                scraper.scrape_all_categories(max_pages=args.max_pages)
 
         if args.stage3:
             scraper.process_pending_reports(limit=args.limit)
 
         if args.stage4:
-            dl.download_all_ready(max_reports=args.max_reports, keep_zip=args.keep_zip)
+            ready = storage.query_by_status("reports", "ready")
+            if args.category:
+                ready = [r for r in ready if r.get("category_id") == args.category]
+                log.info(f"Filtered to category {args.category}: {len(ready)} reports")
+            if args.max_reports:
+                ready = ready[:args.max_reports]
+            dl.download_all_ready(max_reports=len(ready), keep_zip=args.keep_zip, reports=ready)
 
         if args.retry:
             failed = storage.query_by_status("reports", "failed")
@@ -82,7 +95,7 @@ def main():
             dl.download_all_ready(max_reports=len(failed), keep_zip=args.keep_zip)
 
         if args.extract:
-            dl.extract_downloaded_zips(max_reports=args.max_reports, keep_zip=args.keep_zip)
+            dl.extract_downloaded_zips(max_reports=args.max_reports, keep_zip=args.keep_zip, category=args.category)
 
         if args.full:
             scraper.scrape_categories()
