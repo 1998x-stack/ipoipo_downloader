@@ -1,285 +1,321 @@
-# IPO报告自动下载器
+# ipoipo Downloader
 
-一个完整的自动化报告下载系统，支持代理、断点续传、智能去重等功能。
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Tests](https://img.shields.io/badge/tests-44%20passing-brightgreen.svg)]()
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-## ✨ 功能特点
+Automated pipeline for scraping and downloading IPO industry reports from [ipoipo.cn](https://ipoipo.cn). Features anti-hotlinking bypass, proxy rotation, resume capability, and structured JSONL storage.
 
-- 🌐 **代理支持**: 自动解析Clash配置，智能选择最快节点
-- 🔄 **断点续传**: 支持中断后继续下载
-- 🚫 **智能去重**: 自动跳过已下载的文件
-- 📊 **状态管理**: SQLite数据库记录所有下载状态
-- 🎭 **防封策略**: fake-headers + 随机延迟
-- 📦 **自动解压**: 下载完成自动解压ZIP文件
-- 🗂️ **层级目录**: 按分类和报告名称组织文件
-- 📈 **进度显示**: 实时显示下载进度
-- ⚡ **并发下载**: 可选的多线程并发下载
+## Features
 
-## 📁 项目结构
+- **4-Stage Pipeline** — Categories → Report Lists → Download URLs → ZIP Download
+- **Parallel Execution** — Stages 2, 3, and 4 run concurrently with wait-check loops
+- **Anti-Hotlinking Bypass** — Tengine CDN Referer ACL bypass via session management
+- **Proxy Rotation** — Clash YAML parsing, node latency testing, auto-switch on failure
+- **Resume Support** — Per-category and per-page checkpoint tracking via `progress.json`
+- **JSONL Storage** — Append-only event log with state derivation (no SQLite dependency)
+- **Smart Dedup** — Skips already-downloaded reports, validates file integrity
+- **Auto Extraction** — Unzips reports and renames with `{YYYYMMDD}_{title}.{ext}` format
+- **Structured Logging** — Colored console output + machine-parseable JSONL event log
+
+## Quick Start
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run full pipeline (dry-run scale)
+python main.py --full --max-pages 2 --max-reports 10
+
+# Resume from last checkpoint
+python main.py --full --resume
+```
+
+## Pipeline Stages
+
+```
+┌─────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│  Stage 1    │───▶│   Stage 2    │───▶│   Stage 3    │───▶│   Stage 4    │
+│ Categories  │    │ Report Lists │    │  Download    │    │   Download   │
+│             │    │              │    │   URLs       │    │   + Extract  │
+└─────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
+       │                   │                   │                   │
+       ▼                   ▼                   ▼                   ▼
+  categories.jsonl    reports.jsonl      reports.jsonl      reports.jsonl
+```
+
+### Stage 1: Scrape Categories
+Discovers all 38 report categories (TMT, AI, Finance, Education, etc.) and stores them in `categories.jsonl`.
+
+### Stage 2: Scrape Report Lists
+Paginates through each category's report listing, extracting post IDs, titles, thumbnails, and metadata. Supports `--max-pages` to limit depth.
+
+### Stage 3: Extract Download URLs
+Visits each report's download page, extracts the ZIP file URL from the HTML. Bypasses Tengine CDN anti-hotlinking by establishing session cookies first.
+
+### Stage 4: Download & Extract
+Downloads ZIP files with proper Referer headers, validates content type, extracts documents, and renames them with timestamp + title format.
+
+## CLI Reference
+
+### Pipeline Control
+
+| Flag | Description |
+|------|-------------|
+| `--full` | Run all stages sequentially |
+| `--stage1` | Stage 1 only: scrape categories |
+| `--stage2` | Stage 2 only: scrape report lists |
+| `--stage3` | Stage 3 only: extract download URLs |
+| `--stage4` | Stage 4 only: download reports |
+| `--retry` | Retry failed downloads |
+| `--extract` | Extract downloaded ZIPs only |
+| `--stats` | Show pipeline statistics |
+
+### Options
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--max-pages N` | Max pages per category | Unlimited |
+| `--max-reports N` | Max reports to process | Unlimited |
+| `--limit N` | Limit for Stage 3 | 100 |
+| `--category ID` | Filter by category ID | All |
+| `--no-proxy` | Disable proxy | `false` |
+| `--keep-zip` | Retain ZIP after extraction | `false` |
+| `--resume` | Resume from last checkpoint | `false` |
+
+### Examples
+
+```bash
+# Full pipeline with limits
+python main.py --full --max-pages 5 --max-reports 50
+
+# Download specific category
+python main.py --stage4 --category 85 --max-reports 20
+
+# Retry failed downloads
+python main.py --retry --max-reports 10
+
+# Run without proxy
+python main.py --full --no-proxy
+
+# Background execution
+bash scripts/run.sh
+```
+
+## Architecture
+
+### Module Structure
 
 ```
 ipoipo_downloader/
-├── config/
-│   ├── settings.py          # 配置文件
-│   └── clash_config.yaml    # Clash代理配置
-├── core/
-│   ├── proxy_manager.py     # 代理管理器
-│   ├── http_client.py       # HTTP客户端
-│   └── database.py          # 数据库管理
-├── scrapers/
-│   ├── category_scraper.py  # 分类爬虫
-│   ├── list_scraper.py      # 列表爬虫
-│   └── download_scraper.py  # 下载链接爬虫
-├── download/
-│   ├── downloader.py        # 下载管理器
-│   └── file_manager.py      # 文件管理器
+├── main.py              # CLI entry point, parallel pipeline orchestration
+├── scraper.py           # Stages 1-3: HTML parsing, event emission
+├── downloader.py        # Stage 4: ZIP download, extraction, rename
+├── storage.py           # JSONL storage: append, query, state derivation
+├── logger.py            # Dual output: colored console + JSONL file
+├── proxy.py             # Clash config parsing, node selection, auto-switch
+├── config.py            # Centralized configuration
 ├── utils/
-│   └── logger.py            # 日志配置
-├── main.py                  # 主程序
-└── requirements.txt
+│   ├── headers.py       # Browser header generation
+│   ├── sanitize.py      # Filename cleaning, timestamp extraction
+│   └── helpers.py       # Retry decorator, jitter sleep, URL helpers
+├── scripts/
+│   ├── run.sh           # Background pipeline runner
+│   ├── run_stage.sh     # Single stage runner
+│   └── stats.sh         # JSONL stats summary
+├── data/                # Runtime data (gitignored)
+│   ├── categories.jsonl
+│   ├── reports.jsonl
+│   ├── downloads.jsonl
+│   ├── progress.json
+│   └── downloads/       # Downloaded files organized by category
+└── logs/
+    ├── events.jsonl     # Structured event log
+    └── output.log       # Console output capture
 ```
 
-## 🚀 快速开始
+### Storage Design
 
-### 1. 安装依赖
+The system uses append-only JSONL files instead of a database. Each action appends an event:
 
-```bash
-pip install -r requirements.txt
+```jsonl
+{"type": "report_found", "post_id": "26028", "category_id": "85", "title": "...", "ts": "..."}
+{"type": "url_found", "post_id": "26028", "download_url": "https://...", "ts": "..."}
+{"type": "download_completed", "post_id": "26028", "file_path": "...", "file_size": 12345, "ts": "..."}
 ```
 
-### 2. 配置代理（可选）
+Status is derived from the last event per `post_id`:
+- `report_found` → `pending`
+- `url_found` → `ready`
+- `download_completed` → `downloaded`
+- `download_failed` → `failed`
 
-将你的Clash配置文件放到 `config/clash_config.yaml`
+### Anti-Hotlinking
 
-如果不使用代理，运行时加上 `--no-proxy` 参数。
+ZIP files are hosted on `ipo.ai-tag.cn` (Alibaba Cloud CDN) with Referer ACL protection. The bypass works by:
 
-### 3. 运行程序
+1. Visiting `https://ipoipo.cn/download/{post_id}.html` to establish session cookies
+2. Waiting 0.5-1s to simulate human behavior
+3. Downloading the ZIP with `Referer: https://ipoipo.cn/download/{post_id}.html`
+4. Validating `Content-Type` is not `text/html` (catches stealth 403s)
 
-```bash
-# 查看帮助
-python main.py --help
-
-# 运行完整流程（推荐先测试）
-python main.py --full --max-pages 2 --max-reports 10
-
-# 不使用代理运行
-python main.py --full --no-proxy --max-pages 2 --max-reports 10
-```
-
-## 📝 使用示例
-
-### 完整流程
-
-```bash
-# 每个分类爬2页，最多下载10个报告
-python main.py --full --max-pages 2 --max-reports 10
-
-# 使用并发下载加速
-python main.py --full --max-pages 2 --max-reports 10 --concurrent
-```
-
-### 分阶段运行
-
-```bash
-# Stage 1: 爬取分类列表
-python main.py --stage1
-
-# Stage 2: 爬取报告列表（所有分类，每个5页）
-python main.py --stage2 --max-pages 5
-
-# Stage 3: 获取下载链接（前50个报告）
-python main.py --stage3 --limit 50
-
-# Stage 4: 下载报告（最多20个，使用并发）
-python main.py --stage4 --max-reports 20 --concurrent
-```
-
-### 指定分类下载
-
-```bash
-# 只下载"经济报告"分类（ID=34）
-python main.py --stage2 --categories 34 --max-pages 5
-python main.py --stage3 --limit 100
-python main.py --stage4 --category 34 --max-reports 10
-
-# 下载多个分类
-python main.py --stage2 --categories 34 69 85 --max-pages 3
-```
-
-### 查看统计
-
-```bash
-python main.py --stats
-```
-
-## 📂 文件组织
-
-下载的文件按以下结构组织：
+### Proxy Management
 
 ```
-downloads/
-├── 经济报告/
-│   ├── 中国地方公共数据开放利用报告/
-│   │   ├── 2025中国地方公共数据开放利用报告.zip
-│   │   └── [解压后的文件]
-│   └── 另一个报告/
-├── 人工智能AI/
-│   └── ...
-└── 其他分类/
+config/proxy.yaml (Clash format)
+        │
+        ▼
+┌───────────────────┐     ┌───────────────────┐     ┌───────────────────┐
+│  Load Config      │────▶│  Test Nodes       │────▶│  Select Random    │
+│  Parse SS nodes   │     │  TCP connect test │     │  Latency < 500ms  │
+└───────────────────┘     └───────────────────┘     └───────────────────┘
+                                                         │
+                        ┌───────────────────┐            │
+                        │  Switch on 403    │◀───────────┘
+                        │  Mark node failed │
+                        │  Clear cookies    │
+                        └───────────────────┘
 ```
 
-## ⚙️ 配置说明
+## Configuration
 
-### `config/settings.py` 主要配置项：
+### Proxy Setup
+
+1. Place your Clash config at `config/proxy.yaml`
+2. Ensure Clash is running locally (default port 7890)
+3. The system auto-detects the port from `mixed-port` in the config
+
+```yaml
+# config/proxy.yaml (example)
+mixed-port: 7890
+proxies:
+  - name: "HK 01"
+    type: ss
+    server: example.com
+    port: 12345
+    cipher: aes-128-gcm
+    password: "your-password"
+```
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `USE_PROXY` | Enable/disable proxy | `true` |
+
+### Settings
+
+All settings are in `config.py`:
 
 ```python
-# 代理配置
-USE_PROXY = True              # 是否使用代理
-PROXY_TEST_TIMEOUT = 5        # 代理测速超时（秒）
-
-# 下载配置
-DOWNLOAD_DIR = "downloads"    # 下载目录
-MAX_CONCURRENT_DOWNLOADS = 3  # 最大并发数
-
-# 爬虫配置
-REQUEST_DELAY = (1, 3)        # 请求延迟范围（秒）
-MAX_RETRIES = 5               # 最大重试次数
+REQUEST_DELAY = (1, 3)        # Random delay between requests (seconds)
+MAX_RETRIES = 3               # Max retry attempts per request
+DOWNLOAD_TIMEOUT = 300        # Download timeout (seconds)
+MIN_VALID_FILE_SIZE = 1024    # Minimum valid file size (bytes)
+MAX_FILENAME_LENGTH = 200     # Maximum filename length
 ```
 
-## 🗄️ 数据库
+## File Organization
 
-使用SQLite存储下载状态，位于 `data/downloads.db`
+Downloaded files are organized by category with sanitized names:
 
-### 主要数据表：
+```
+data/downloads/
+├── 85_人工智能AI行业/
+│   ├── 20251222_中国人工智能发展报告_55页.pdf
+│   ├── 20251220_AI行业趋势分析_38页.pdf
+│   └── ...
+├── 7_教育行业/
+│   ├── 20251215_在线教育市场研究_42页.pdf
+│   └── ...
+└── 70_TMT行业/
+    └── ...
+```
 
-- `categories`: 分类信息
-- `reports`: 报告列表
-- `downloads`: 下载记录
-- `extractions`: 解压记录
+Filename format: `{YYYYMMDD}_{sanitized_title}_{pages}页.{ext}`
 
-### 报告状态：
+## Logging
 
-- `pending`: 待获取下载链接
-- `ready`: 准备下载
-- `downloaded`: 已下载
-- `failed`: 失败
-- `no_download_url`: 没有下载链接
+### Console Output
+Real-time colored output with emoji indicators:
 
-## 📋 日志
+```
+2026-04-22 08:00:00 [INFO ] main         Stage 2: Scraping category:85 人工智能AI行业
+2026-04-22 08:00:01 [OK   ] main         report:26028 中国人工智能发展报告（55页）
+2026-04-22 08:00:30 [WARN ] downloader   ⚠ 403 on post:26029, switching proxy...
+2026-04-22 08:00:35 [OK   ] downloader   ✓ downloaded: 26029 (12.3 MB, 15.2s)
+```
 
-日志文件位于 `logs/` 目录：
-
-- `app_YYYY-MM-DD.log`: 完整日志
-- `error_YYYY-MM-DD.log`: 错误日志
-
-## 🔧 高级功能
-
-### 断点续传
-
-程序会自动检测未完成的下载并继续：
+### Event Log
+Structured JSONL for analysis:
 
 ```bash
-# 正常下载（支持断点续传）
-python main.py --stage4 --max-reports 100
+# Count events by type
+jq -r '.type' logs/events.jsonl | sort | uniq -c
 
-# 强制重新下载
-python main.py --stage4 --max-reports 100 --force
+# Find all failed downloads
+jq -c 'select(.level == "error")' logs/events.jsonl
+
+# Track a specific report
+jq -c 'select(.post_id == "26028")' logs/events.jsonl
 ```
 
-### 并发下载
+## Testing
 
 ```bash
-# 使用3个线程并发下载（在settings.py中配置）
-python main.py --stage4 --concurrent
+# Run all tests
+python -m unittest discover tests/ -v
+
+# Run specific test module
+python -m unittest tests/test_storage.py -v
 ```
 
-### 只下载特定分类
+Test coverage:
+- `test_utils.py` — Headers, sanitization, helpers (15 tests)
+- `test_logger.py` — Dual output logging (5 tests)
+- `test_storage.py` — JSONL storage operations (11 tests)
+- `test_proxy.py` — Proxy manager (5 tests)
+- `test_scraper.py` — HTML parsing (3 tests)
+- `test_downloader.py` — Download flow (4 tests)
+
+## Troubleshooting
+
+### Common Issues
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| `403 Forbidden` on ZIP download | Missing Referer header | Ensure you're using the latest version |
+| `Connection refused` on port 7890 | Clash not running | Start Clash or use `--no-proxy` |
+| `unknown` folder in downloads | Missing `category_name` in storage | Run with `--resume` to backfill |
+| Duplicate downloads | Storage/disk state mismatch | Run `python main.py --stats` to check |
+| Slow scraping | Rate limiting | Increase `REQUEST_DELAY` in `config.py` |
+
+### Debug Mode
 
 ```bash
-# 查看所有分类ID（在settings.py中）
-grep "CATEGORY_NAMES" config/settings.py
-
-# 下载经济报告（ID=34）
-python main.py --full --categories 34 --max-pages 10
+# Enable verbose logging
+export LOG_LEVEL=DEBUG
+python main.py --stage2 --max-pages 1
 ```
 
-## ⚠️ 注意事项
+## Contributing
 
-1. **首次运行**: 建议先用 `--max-pages 2 --max-reports 10` 测试
-2. **代理配置**: 如果代理不稳定，可以用 `--no-proxy` 不使用代理
-3. **磁盘空间**: 确保有足够的磁盘空间（每个报告通常几MB到几十MB）
-4. **网络限制**: 建议设置合理的延迟，避免被封（在settings.py中配置）
-5. **中断恢复**: 程序被中断后可以继续运行，会自动跳过已下载的文件
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Write tests for new functionality
+4. Ensure all tests pass (`python -m unittest discover tests/ -v`)
+5. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
 
-## 🐛 常见问题
+## License
 
-### 1. 代理连接失败
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
-```bash
-# 检查代理配置文件是否正确
-ls config/clash_config.yaml
+## Acknowledgments
 
-# 或者不使用代理
-python main.py --full --no-proxy
-```
-
-### 2. 下载速度慢
-
-```bash
-# 使用并发下载
-python main.py --stage4 --concurrent
-
-# 或者选择更快的代理节点（程序会自动测速选择）
-```
-
-### 3. 某些报告下载失败
-
-```bash
-# 查看错误日志
-tail -f logs/error_*.log
-
-# 重新尝试失败的报告
-python main.py --stage4 --force
-```
-
-### 4. 数据库损坏
-
-```bash
-# 删除数据库重新开始
-rm data/downloads.db
-python main.py --full
-```
-
-## 📊 性能优化
-
-1. **并发下载**: 使用 `--concurrent` 参数
-2. **代理选择**: 程序会自动选择最快的代理节点
-3. **断点续传**: 避免重复下载
-4. **智能去重**: 自动跳过已下载的文件
-
-## 🔐 安全性
-
-- 使用fake-headers模拟真实浏览器
-- 随机延迟避免被识别为机器人
-- 支持代理隐藏真实IP
-- 自动重试处理网络错误
-
-## 📈 监控
-
-```bash
-# 查看实时日志
-tail -f logs/app_*.log
-
-# 查看错误日志
-tail -f logs/error_*.log
-
-# 查看数据库统计
-python main.py --stats
-```
-
-## 🤝 贡献
-
-欢迎提交Issue和Pull Request！
-
-## 📄 许可证
-
-MIT License
+- [ipoipo.cn](https://ipoipo.cn) — Source of IPO industry reports
+- [Clash](https://github.com/Dreamacro/clash) — Proxy configuration format
+- [BeautifulSoup4](https://www.crummy.com/software/BeautifulSoup/) — HTML parsing
+- [requests](https://requests.readthedocs.io/) — HTTP client with session management

@@ -1,4 +1,0 @@
-2025-12-26 23:20:29 | ERROR    | __main__:main:318 - 
-❌ 发生错误: 'Database' object has no attribute 'get_ready_reports'
-2025-12-26 23:23:29 | ERROR    | __main__:main:318 - 
-❌ 发生错误: 'FileManager' object has no attribute 'get_report_path'
