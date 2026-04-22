@@ -112,7 +112,7 @@ class ProxyManager:
         if self.current_node:
             self.mark_node_failed(self.current_node)
         try:
-            new_node = self.select_random()
+            self.select_random()
             return True
         except RuntimeError:
             self.log.error("No nodes available for switch")

@@ -1,10 +1,7 @@
 """Tests for downloader module."""
 import unittest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch
 import tempfile
-import os
-import zipfile
-from pathlib import Path
 from downloader import Downloader
 from storage import Storage
 from logger import Logger
@@ -47,7 +44,6 @@ class TestDownloader(unittest.TestCase):
         })
         self.storage.close()
         storage2 = Storage(self.temp_dir)
-        dl = Downloader(storage2, self.log, use_proxy=False)
         ready = storage2.query_by_status("reports", "ready")
         self.assertEqual(len(ready), 1)
         storage2.close()

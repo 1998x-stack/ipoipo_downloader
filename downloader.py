@@ -2,7 +2,7 @@
 import os
 import zipfile
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Tuple
 from urllib.parse import urlparse
 import requests
 from config import (
@@ -53,7 +53,6 @@ class Downloader:
             if "text/html" in content_type.lower() and zip_url.endswith(".zip"):
                 self.log.error("Received HTML instead of ZIP")
                 return False, 0
-            total = int(resp.headers.get("Content-Length", 0))
             save_path.parent.mkdir(parents=True, exist_ok=True)
             size = 0
             with open(save_path, "wb") as f:
@@ -71,7 +70,6 @@ class Downloader:
             if not zipfile.is_zipfile(zip_path):
                 self.log.error(f"Invalid ZIP: {zip_path}")
                 return False
-            timestamp = extract_timestamp_from_zip(zip_path.name)
             with zipfile.ZipFile(zip_path, "r") as zf:
                 for name in zf.namelist():
                     clean = clean_filename(name)
@@ -106,7 +104,6 @@ class Downloader:
         zip_url = report.get("download_url", "")
         category_id = report.get("category_id", "0")
         category_name = report.get("category_name", "unknown")
-        publish_date = report.get("publish_date", "")
 
         if not zip_url:
             self.log.warn(f"No download URL for {post_id}")

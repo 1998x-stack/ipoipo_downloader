@@ -1,8 +1,7 @@
 """Tests for scraper module."""
 import unittest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch
 import tempfile
-import os
 from scraper import Scraper
 from storage import Storage
 from logger import Logger

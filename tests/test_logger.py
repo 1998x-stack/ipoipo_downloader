@@ -21,7 +21,7 @@ class TestLogger(unittest.TestCase):
         self.logger.info("test message", key="value")
         self.logger.close()
         with open(self.temp_log.name) as f:
-            lines = [l for l in f.readlines() if l.strip()]
+            lines = [line for line in f.readlines() if line.strip()]
         self.assertEqual(len(lines), 1)
         entry = json.loads(lines[0])
         self.assertEqual(entry["level"], "info")
@@ -33,7 +33,7 @@ class TestLogger(unittest.TestCase):
         self.logger.ok("success message")
         self.logger.close()
         with open(self.temp_log.name) as f:
-            lines = [l for l in f.readlines() if l.strip()]
+            lines = [line for line in f.readlines() if line.strip()]
         self.assertEqual(len(lines), 1)
         entry = json.loads(lines[0])
         self.assertEqual(entry["level"], "ok")
@@ -42,7 +42,7 @@ class TestLogger(unittest.TestCase):
         self.logger.warn("warning message")
         self.logger.close()
         with open(self.temp_log.name) as f:
-            lines = [l for l in f.readlines() if l.strip()]
+            lines = [line for line in f.readlines() if line.strip()]
         entry = json.loads(lines[0])
         self.assertEqual(entry["level"], "warn")
 
@@ -50,7 +50,7 @@ class TestLogger(unittest.TestCase):
         self.logger.error("error message")
         self.logger.close()
         with open(self.temp_log.name) as f:
-            lines = [l for l in f.readlines() if l.strip()]
+            lines = [line for line in f.readlines() if line.strip()]
         entry = json.loads(lines[0])
         self.assertEqual(entry["level"], "error")
 

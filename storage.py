@@ -1,6 +1,5 @@
 """JSONL storage: append-only event log with state derivation."""
 import json
-import os
 import threading
 from pathlib import Path
 from typing import Optional
@@ -168,7 +167,6 @@ class Storage:
         with self._lock:
             cat_lines = self._read_lines("categories")
             report_lines = self._read_lines("reports")
-            dl_lines = self._read_lines("downloads")
         stats = {"total_categories": 0, "total_reports": 0, "total_downloads": 0, "by_status": {}}
 
         # Categories

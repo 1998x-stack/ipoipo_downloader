@@ -7,8 +7,7 @@ from bs4 import BeautifulSoup
 import requests
 from config import (
     CATEGORY_NAMES, CATEGORY_PAGE_URL, CATEGORY_PAGE_PAGINATED,
-    DOWNLOAD_URL, REQUEST_DELAY, REQUEST_TIMEOUT, MAX_RETRIES,
-    USE_PROXY, PROXY_CONFIG_PATH,
+    DOWNLOAD_URL, REQUEST_DELAY, REQUEST_TIMEOUT, USE_PROXY,
 )
 from utils.headers import get_browser_headers
 from utils.helpers import sleep_jitter
@@ -36,7 +35,7 @@ class Scraper:
         existing_ids = set()
         if resume:
             cat_lines = self.storage._read_lines("categories")
-            existing_ids = {json.loads(l)["category_id"] for l in cat_lines if l.strip()}
+            existing_ids = {json.loads(line)["category_id"] for line in cat_lines if line.strip()}
             self.log.info(f"  Found {len(existing_ids)} existing categories, skipping")
         categories = []
         for cat_id, cat_name in CATEGORY_NAMES.items():
@@ -136,7 +135,7 @@ class Scraper:
             try:
                 reports = self.scrape_page(url)
                 proxy_failures = 0
-            except (requests.exceptions.ProxyError, requests.exceptions.ConnectionError) as e:
+            except (requests.exceptions.ProxyError, requests.exceptions.ConnectionError):
                 proxy_failures += 1
                 if proxy_failures >= max_proxy_retries:
                     if self.proxy_manager:
