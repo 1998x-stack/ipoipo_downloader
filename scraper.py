@@ -69,12 +69,12 @@ class Scraper:
             return reports
         except requests.exceptions.ProxyError as e:
             self.log.error(f"Proxy error on {url}: {e}")
-            raise  # Re-raise proxy errors so caller can handle them
+            return []
         except requests.exceptions.ConnectionError as e:
             if "refused" in str(e).lower() or "proxy" in str(e).lower():
                 self.log.error(f"Connection refused (proxy down?) on {url}: {e}")
-                raise
-            self.log.error(f"Connection error on {url}: {e}")
+            else:
+                self.log.error(f"Connection error on {url}: {e}")
             return []
         except Exception as e:
             self.log.error(f"Failed to scrape page: {url} — {e}")

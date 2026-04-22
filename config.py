@@ -68,6 +68,7 @@ DOWNLOAD_TIMEOUT = 300
 REQUEST_TIMEOUT = 30
 
 # Proxy settings
+# Default: proxy enabled. Override via USE_PROXY=false env or --no-proxy CLI flag.
 PROXY_CONFIG_PATH = BASE_DIR / "config" / "proxy.yaml"
 PROXY_TEST_TIMEOUT = 3
 PROXY_MAX_LATENCY = 500
