@@ -1,15 +1,16 @@
-"""Browser header generation."""
+"""Browser header generation with rotating User-Agents."""
 
-DEFAULT_HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+from fake_headers import Headers
+
+_fake = Headers(browser="chrome", os="mac")
+
+# Full browser fingerprint headers (sec-ch-ua, Sec-Fetch-*, etc.)
+# These are merged with fake-headers output to provide complete fingerprints
+FINGERPRINT_HEADERS = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
     "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
     "Accept-Encoding": "gzip, deflate, br",
-    "Connection": "keep-alive",
     "Upgrade-Insecure-Requests": "1",
-    "sec-ch-ua": '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
-    "sec-ch-ua-mobile": "?0",
-    "sec-ch-ua-platform": '"macOS"',
     "Sec-Fetch-Dest": "document",
     "Sec-Fetch-Mode": "navigate",
     "Sec-Fetch-Site": "none",
@@ -19,8 +20,13 @@ DEFAULT_HEADERS = {
 
 
 def get_browser_headers(referer: str = None) -> dict:
-    """Return browser headers, optionally with Referer."""
-    headers = dict(DEFAULT_HEADERS)
+    """Return rotating browser headers with full fingerprint.
+
+    Each call generates a fresh User-Agent via fake-headers,
+    merged with consistent Sec-Fetch-* and Accept headers.
+    """
+    headers = _fake.generate()
+    headers.update(FINGERPRINT_HEADERS)
     if referer:
         headers["Referer"] = referer
         headers["Sec-Fetch-Site"] = "cross-site"
