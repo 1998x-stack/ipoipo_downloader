@@ -72,8 +72,14 @@ class Downloader:
                 return False
             with zipfile.ZipFile(zip_path, "r") as zf:
                 for name in zf.namelist():
+                    # Prevent path traversal
+                    if ".." in name or name.startswith("/"):
+                        self.log.warn(f"Skipping suspicious ZIP entry: {name}")
+                        continue
                     clean = clean_filename(name)
                     target = extract_dir / clean
+                    # Ensure target stays within extract_dir
+                    target.resolve().relative_to(extract_dir.resolve())
                     target.parent.mkdir(parents=True, exist_ok=True)
                     with zf.open(name) as src, open(target, "wb") as dst:
                         dst.write(src.read())

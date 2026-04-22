@@ -1,5 +1,6 @@
 """JSONL storage: append-only event log with state derivation."""
 import json
+import os
 import threading
 from pathlib import Path
 from typing import Optional
@@ -66,6 +67,7 @@ class Storage:
             handle = self._get_handle(file_key)
             handle.write(json.dumps(data, ensure_ascii=False) + "\n")
             handle.flush()
+            os.fsync(handle.fileno())
             if "post_id" in data:
                 self._seen_ids[file_key].add(data["post_id"])
             elif "category_id" in data:

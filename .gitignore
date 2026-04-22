@@ -95,3 +95,4 @@ config/proxy.yaml
 *.log
 output.log
 progress.json
+.ruff_cache

@@ -59,7 +59,9 @@ def extract_timestamp_from_zip(filename: str) -> str:
 def generate_doc_filename(zip_filename: str, report_title: str, publish_date: str = None) -> str:
     """Generate final document filename: YYYYMMDD_sanitized_title.ext."""
     ts = extract_timestamp_from_zip(zip_filename)
-    ext = Path(zip_filename).suffix.replace(".zip", "")
+    ext = Path(zip_filename).suffix
+    if ext.lower() == ".zip":
+        ext = ""
     if not ext:
         ext = ".pdf"  # default
 
