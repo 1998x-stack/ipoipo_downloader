@@ -15,6 +15,8 @@ def run_parallel_pipeline(storage, log, use_proxy, proxy_manager, max_pages, max
     """Run stages 2, 3, 4 concurrently with wait-check loops."""
     stage2_done = threading.Event()
     stage3_done = threading.Event()
+    errors = []
+    errors_lock = threading.Lock()
 
     scraper2 = Scraper(storage, log, use_proxy=use_proxy, proxy_manager=proxy_manager)
     scraper3 = Scraper(storage, log, use_proxy=use_proxy, proxy_manager=proxy_manager)
@@ -24,6 +26,10 @@ def run_parallel_pipeline(storage, log, use_proxy, proxy_manager, max_pages, max
         try:
             scraper2.scrape_categories(resume=resume)
             scraper2.scrape_all_categories(max_pages=max_pages, resume=resume)
+        except Exception as e:
+            with errors_lock:
+                errors.append(("Stage2", e))
+            log.error(f"Stage 2 failed: {e}")
         finally:
             stage2_done.set()
             scraper2.close()
@@ -40,6 +46,10 @@ def run_parallel_pipeline(storage, log, use_proxy, proxy_manager, max_pages, max
                     break
                 else:
                     time.sleep(15)
+        except Exception as e:
+            with errors_lock:
+                errors.append(("Stage3", e))
+            log.error(f"Stage 3 failed: {e}")
         finally:
             stage3_done.set()
             scraper3.close()
@@ -57,6 +67,10 @@ def run_parallel_pipeline(storage, log, use_proxy, proxy_manager, max_pages, max
                     break
                 else:
                     time.sleep(15)
+        except Exception as e:
+            with errors_lock:
+                errors.append(("Stage4", e))
+            log.error(f"Stage 4 failed: {e}")
         finally:
             dl.close()
 
@@ -71,6 +85,11 @@ def run_parallel_pipeline(storage, log, use_proxy, proxy_manager, max_pages, max
     t2.join()
     t3.join()
     t4.join()
+
+    if errors:
+        for stage, err in errors:
+            log.error(f"{stage} error: {err}")
+        raise RuntimeError(f"Pipeline failed: {len(errors)} stage(s) errored")
 
 
 def main():

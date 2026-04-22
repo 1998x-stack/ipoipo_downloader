@@ -114,8 +114,14 @@ class Downloader:
 
         # Check storage state first
         if self.storage.is_report_downloaded(post_id):
-            self.log.info(f"Already downloaded (storage): {post_id} {title[:40]}")
-            return True
+            # Verify file actually exists on disk
+            doc_pattern = f"_{clean_filename(title)}"
+            cat_dir_check = self.get_category_dir(category_id, category_name)
+            existing_check = list(cat_dir_check.glob(f"*{doc_pattern[:30]}*"))
+            if existing_check and any(f.stat().st_size > MIN_VALID_FILE_SIZE for f in existing_check):
+                self.log.info(f"Already downloaded (verified): {post_id} {title[:40]}")
+                return True
+            self.log.warn(f"Storage says downloaded but file missing, re-downloading: {post_id}")
 
         download_page_url = self.get_download_page_url(post_id)
         cat_dir = self.get_category_dir(category_id, category_name)

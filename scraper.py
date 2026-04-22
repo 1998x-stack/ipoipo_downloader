@@ -139,7 +139,15 @@ class Scraper:
             except (requests.exceptions.ProxyError, requests.exceptions.ConnectionError) as e:
                 proxy_failures += 1
                 if proxy_failures >= max_proxy_retries:
-                    self.log.error(f"Proxy failed {proxy_failures} times, stopping category {category_id}")
+                    if self.proxy_manager:
+                        self.log.warn(f"Proxy failed {proxy_failures} times, switching node...")
+                        if self.proxy_manager.switch_node():
+                            self.session.proxies.update(self.proxy_manager.get_local_proxy())
+                            self.session.cookies.clear()
+                            proxy_failures = 0
+                            time.sleep(5)
+                            continue
+                    self.log.error(f"Proxy failed {proxy_failures} times with no recovery, stopping category {category_id}")
                     break
                 wait = min(proxy_failures * 5, 30)
                 self.log.warn(f"Proxy error (attempt {proxy_failures}/{max_proxy_retries}), waiting {wait}s before retry...")
@@ -155,6 +163,7 @@ class Scraper:
                     "type": "report_found",
                     "post_id": r["post_id"],
                     "category_id": category_id,
+                    "category_name": category_name,
                     "title": r["title"],
                     "detail_url": r["detail_url"],
                     "thumbnail_url": r["thumbnail_url"],

@@ -80,7 +80,8 @@ class Storage:
 
     def get_state(self, file_key: str, entity_id: str) -> Optional[dict]:
         """Get the last event state for an entity."""
-        lines = self._read_lines(file_key)
+        with self._lock:
+            lines = self._read_lines(file_key)
         last_state = None
         for line in lines:
             try:
@@ -93,8 +94,8 @@ class Storage:
 
     def query_by_status(self, file_key: str, status: str) -> list:
         """Query all entities with a given derived status."""
-        lines = self._read_lines(file_key)
-        # Group by post_id, merge all fields, keep last event type for status
+        with self._lock:
+            lines = self._read_lines(file_key)
         states = {}
         for line in lines:
             try:
@@ -116,7 +117,8 @@ class Storage:
 
     def get_reports_by_category(self, category_id: str) -> list:
         """Get all reports for a category (latest state per post_id)."""
-        lines = self._read_lines("reports")
+        with self._lock:
+            lines = self._read_lines("reports")
         states = {}
         for line in lines:
             try:
@@ -129,7 +131,8 @@ class Storage:
 
     def get_category_report_count(self, category_id: str) -> int:
         """Count unique reports for a category."""
-        lines = self._read_lines("reports")
+        with self._lock:
+            lines = self._read_lines("reports")
         post_ids = set()
         for line in lines:
             try:
@@ -147,14 +150,16 @@ class Storage:
 
     def get_stats(self) -> dict:
         """Get overall statistics."""
+        with self._lock:
+            cat_lines = self._read_lines("categories")
+            report_lines = self._read_lines("reports")
+            dl_lines = self._read_lines("downloads")
         stats = {"total_categories": 0, "total_reports": 0, "total_downloads": 0, "by_status": {}}
 
         # Categories
-        cat_lines = self._read_lines("categories")
         stats["total_categories"] = len(cat_lines)
 
         # Reports
-        report_lines = self._read_lines("reports")
         states = {}
         for line in report_lines:
             try:
@@ -173,7 +178,6 @@ class Storage:
         stats["by_status"] = status_counts
 
         # Downloads (count unique post_ids)
-        dl_lines = self._read_lines("downloads")
         dl_ids = set()
         for line in dl_lines:
             try:
