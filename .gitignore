@@ -3,15 +3,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# C extensions
-*.so
-
 # Distribution / packaging
 .Python
 build/
 develop-eggs/
 dist/
-downloads/
 eggs/
 .eggs/
 lib/
@@ -38,20 +34,17 @@ htmlcov/
 .nox/
 .coverage
 .coverage.*
-.cache
 nosetests.xml
 coverage.xml
 *.cover
-*.py,cover
+*.py.cover
 .hypothesis/
 .pytest_cache/
 
-# Translations
-*.mo
-*.pot
-
 # Environments
 .env
+.env.*
+!.env.example
 .venv/
 env/
 venv/
@@ -70,8 +63,8 @@ ENV/
 
 # OS
 .DS_Store
-.DS_Store?
-._*
+**/.DS_Store
+._.DS_Store
 .Spotlight-V100
 .Trashes
 ehthumbs.db
@@ -92,7 +85,3 @@ dmypy.json
 data/
 logs/
 config/proxy.yaml
-*.log
-output.log
-progress.json
-.ruff_cache

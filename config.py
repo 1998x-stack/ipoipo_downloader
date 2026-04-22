@@ -1,25 +1,48 @@
-"""Configuration for ipoipo downloader."""
+"""Configuration for ipoipo downloader.
+
+This module centralizes all configuration constants used across the pipeline,
+including directory paths, URL templates, category mappings, request/proxy
+settings, and logging parameters.
+
+Directories are created on import to ensure they exist before any stage runs.
+"""
 import os
 from pathlib import Path
+from typing import Dict, Tuple
 
-BASE_DIR = Path(__file__).resolve().parent
-DATA_DIR = BASE_DIR / "data"
-DOWNLOAD_DIR = DATA_DIR / "downloads"
-LOG_DIR = BASE_DIR / "logs"
+# =============================================================================
+# 路径常量 — 项目根目录及数据/日志目录
+# 导入时自动创建目录，确保后续阶段无需重复检查
+# =============================================================================
+BASE_DIR: Path = Path(__file__).resolve().parent
+DATA_DIR: Path = BASE_DIR / "data"
+DOWNLOAD_DIR: Path = DATA_DIR / "downloads"
+LOG_DIR: Path = BASE_DIR / "logs"
 
-for d in [DATA_DIR, DOWNLOAD_DIR, LOG_DIR]:
-    d.mkdir(parents=True, exist_ok=True)
+for directory in [DATA_DIR, DOWNLOAD_DIR, LOG_DIR]:
+    directory.mkdir(parents=True, exist_ok=True)
 
-# Website URLs
-BASE_URL = "https://ipoipo.cn"
-CATEGORY_PAGE_URL = "https://ipoipo.cn/tags-{}.html"
-CATEGORY_PAGE_PAGINATED = "https://ipoipo.cn/tags-{}_{}.html"
-POST_URL = "https://ipoipo.cn/post/{}.html"
-DOWNLOAD_URL = "https://ipoipo.cn/download/{}.html"
-ZIP_HOST = "https://ipo.ai-tag.cn"
+# =============================================================================
+# URL 模板 — ipoipo 网站各页面的 URL 构造规则
+# BASE_URL: 网站首页
+# CATEGORY_PAGE_URL: 分类首页（单页）
+# CATEGORY_PAGE_PAGINATED: 分类分页（第 N 页）
+# POST_URL: 文章详情页
+# DOWNLOAD_URL: 下载页（用于获取 ZIP 直链）
+# ZIP_HOST: ZIP 文件托管域名（阿里云 CDN，有 Referer ACL）
+# =============================================================================
+BASE_URL: str = "https://ipoipo.cn"
+CATEGORY_PAGE_URL: str = "https://ipoipo.cn/tags-{}.html"
+CATEGORY_PAGE_PAGINATED: str = "https://ipoipo.cn/tags-{}_{}.html"
+POST_URL: str = "https://ipoipo.cn/post/{}.html"
+DOWNLOAD_URL: str = "https://ipoipo.cn/download/{}.html"
+ZIP_HOST: str = "https://ipo.ai-tag.cn"
 
-# Category mappings (ID -> name)
-CATEGORY_NAMES = {
+# =============================================================================
+# 分类映射 — 分类 ID 到中文名称
+# 用于下载目录命名和日志输出
+# =============================================================================
+CATEGORY_NAMES: Dict[str, str] = {
     "70": "TMT行业",
     "53": "医药医疗器械行业",
     "59": "金融行业",
@@ -60,25 +83,45 @@ CATEGORY_NAMES = {
     "54": "博彩行业报告",
 }
 
-# Request settings
-REQUEST_DELAY = (1, 3)
-MAX_RETRIES = 3
-RETRY_DELAY = 1.5
-DOWNLOAD_TIMEOUT = 300
-REQUEST_TIMEOUT = 30
+# =============================================================================
+# 请求设置 — 控制爬虫请求频率和重试策略
+# REQUEST_DELAY: 两次请求间的随机延迟范围（秒），防止触发反爬
+# MAX_RETRIES: 单个请求最大重试次数
+# RETRY_DELAY: 重试间隔（秒）
+# DOWNLOAD_TIMEOUT: 下载超时（秒），ZIP 文件可能较大
+# REQUEST_TIMEOUT: 普通 HTTP 请求超时（秒）
+# =============================================================================
+REQUEST_DELAY: Tuple[int, int] = (1, 3)
+MAX_RETRIES: int = 3
+RETRY_DELAY: float = 1.5
+DOWNLOAD_TIMEOUT: int = 300
+REQUEST_TIMEOUT: int = 30
 
-# Proxy settings
-# Default: proxy enabled. Override via USE_PROXY=false env or --no-proxy CLI flag.
-PROXY_CONFIG_PATH = BASE_DIR / "config" / "proxy.yaml"
-PROXY_TEST_TIMEOUT = 3
-PROXY_MAX_LATENCY = 500
-USE_PROXY = os.getenv("USE_PROXY", "true").lower() == "true"
+# =============================================================================
+# 代理设置 — Clash 代理配置
+# PROXY_CONFIG_PATH: Clash YAML 配置文件路径（被 gitignore）
+# PROXY_TEST_TIMEOUT: 代理节点连通性测试超时（秒）
+# PROXY_MAX_LATENCY: 节点最大可接受延迟（毫秒）
+# USE_PROXY: 是否启用代理，可通过环境变量 USE_PROXY=false 覆盖
+# =============================================================================
+PROXY_CONFIG_PATH: Path = BASE_DIR / "config" / "proxy.yaml"
+PROXY_TEST_TIMEOUT: int = 3
+PROXY_MAX_LATENCY: int = 500
+USE_PROXY: bool = os.getenv("USE_PROXY", "true").lower() == "true"
 
-# Download settings
-CHUNK_SIZE = 8192
-KEEP_ZIP = False
-MAX_FILENAME_LENGTH = 200
-MIN_VALID_FILE_SIZE = 1024  # bytes
+# =============================================================================
+# 下载设置 — ZIP 下载和文件处理参数
+# CHUNK_SIZE: 流式下载的块大小（字节）
+# KEEP_ZIP: 解压后是否保留原始 ZIP 文件
+# MAX_FILENAME_LENGTH: 文件名最大长度，防止超长文件名
+# MIN_VALID_FILE_SIZE: 最小有效文件大小（字节），过滤空文件/错误响应
+# =============================================================================
+CHUNK_SIZE: int = 8192
+KEEP_ZIP: bool = False
+MAX_FILENAME_LENGTH: int = 200
+MIN_VALID_FILE_SIZE: int = 1024
 
-# Logging
-LOG_FILE = LOG_DIR / "events.jsonl"
+# =============================================================================
+# 日志设置 — 事件日志文件路径
+# =============================================================================
+LOG_FILE: Path = LOG_DIR / "events.jsonl"
