@@ -173,11 +173,13 @@ class Scraper:
                 new_count += 1
                 self.log.ok(f"  report:{r['post_id']} {r['title'][:40]}")
             all_reports.extend(reports)
+            self.storage.save_progress(category_id, page)
             if max_pages and page >= max_pages:
                 break
             page += 1
             sleep_jitter(*REQUEST_DELAY)
         self.log.info(f"  Total reports for {category_name}: {len(all_reports)} ({new_count} new)")
+        self.storage.save_progress(category_id, 0)  # Reset progress when done
         return all_reports
 
     def scrape_all_categories(self, max_pages: int = None, resume: bool = False):
@@ -192,6 +194,11 @@ class Scraper:
             cat_id = cat["category_id"]
             cat_name = cat["category_name"]
             if resume:
+                last_page = self.storage.get_progress(cat_id)
+                if last_page > 0:
+                    self.log.info(f"[{i}/{total_cats}] Resuming category:{cat_id} {cat_name} from page {last_page + 1}")
+                    self.scrape_category(cat_id, cat_name, max_pages=max_pages, start_page=last_page + 1)
+                    continue
                 existing = self.storage.get_category_report_count(cat_id)
                 if existing > 0:
                     self.log.info(f"[{i}/{total_cats}] Skipping category:{cat_id} {cat_name} ({existing} reports already)")

@@ -31,6 +31,8 @@ class Storage:
         self._files = {}  # file_key → file handle
         self._seen_ids = {}  # file_key → set of IDs
         self._lock = threading.Lock()
+        self._progress_path = self.data_dir / "progress.json"
+        self._progress = self._load_progress()
 
     def _file_path(self, file_key: str) -> Path:
         return self.data_dir / FILE_NAMES.get(file_key, f"{file_key}.jsonl")
@@ -202,6 +204,22 @@ class Storage:
         stats["total_downloads"] = len(dl_ids)
 
         return stats
+
+    def _load_progress(self) -> dict:
+        if self._progress_path.exists():
+            try:
+                return json.loads(self._progress_path.read_text())
+            except json.JSONDecodeError:
+                return {}
+        return {}
+
+    def save_progress(self, category_id: str, page: int):
+        with self._lock:
+            self._progress[category_id] = page
+            self._progress_path.write_text(json.dumps(self._progress))
+
+    def get_progress(self, category_id: str) -> int:
+        return self._progress.get(category_id, 0)
 
     def close(self):
         """Close all file handles."""
