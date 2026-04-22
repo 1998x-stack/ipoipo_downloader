@@ -192,16 +192,8 @@ class Storage:
             status_counts[derived] = status_counts.get(derived, 0) + 1
         stats["by_status"] = status_counts
 
-        # Downloads (count unique post_ids)
-        dl_ids = set()
-        for line in dl_lines:
-            try:
-                data = json.loads(line)
-                if "post_id" in data:
-                    dl_ids.add(data["post_id"])
-            except json.JSONDecodeError:
-                continue
-        stats["total_downloads"] = len(dl_ids)
+        downloaded_count = sum(1 for state in states.values() if state.get("type") == "download_completed")
+        stats["total_downloads"] = downloaded_count
 
         return stats
 

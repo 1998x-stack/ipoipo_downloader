@@ -139,6 +139,8 @@ class Downloader:
                     self.storage.append("reports", {
                         "type": "download_completed",
                         "post_id": post_id,
+                        "category_id": category_id,
+                        "category_name": category_name,
                         "file_path": str(cat_dir),
                         "file_size": f.stat().st_size,
                     })
@@ -195,6 +197,8 @@ class Downloader:
             self.storage.append("reports", {
                 "type": "download_completed",
                 "post_id": post_id,
+                "category_id": category_id,
+                "category_name": category_name,
                 "file_path": str(cat_dir),
                 "file_size": size,
             })
