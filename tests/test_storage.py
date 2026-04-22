@@ -121,6 +121,18 @@ class TestStorage(unittest.TestCase):
         self.assertFalse(self.storage.is_report_downloaded("2"))
         self.assertFalse(self.storage.is_report_downloaded("999"))
 
+    def test_query_by_status_merges_fields(self):
+        """query_by_status should merge fields from all events (fixes 'unknown' title bug)."""
+        self._append_report(type="report_found", post_id="1", title="Test Report", category_id="85")
+        self._append_report(type="url_found", post_id="1", download_url="http://x.zip")
+        self.storage.close()
+        ready = self.storage.query_by_status("reports", "ready")
+        self.assertEqual(len(ready), 1)
+        self.assertEqual(ready[0]["post_id"], "1")
+        self.assertEqual(ready[0]["title"], "Test Report")
+        self.assertEqual(ready[0]["category_id"], "85")
+        self.assertEqual(ready[0]["download_url"], "http://x.zip")
+
 
 if __name__ == "__main__":
     unittest.main()

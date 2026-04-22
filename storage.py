@@ -94,13 +94,16 @@ class Storage:
     def query_by_status(self, file_key: str, status: str) -> list:
         """Query all entities with a given derived status."""
         lines = self._read_lines(file_key)
-        # Group by post_id, keep last event
+        # Group by post_id, merge all fields, keep last event type for status
         states = {}
         for line in lines:
             try:
                 data = json.loads(line)
                 if "post_id" in data:
-                    states[data["post_id"]] = data
+                    pid = data["post_id"]
+                    if pid not in states:
+                        states[pid] = {}
+                    states[pid].update(data)
             except json.JSONDecodeError:
                 continue
 
