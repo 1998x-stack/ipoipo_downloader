@@ -96,6 +96,16 @@ class Storage:
         """Query all entities with a given derived status."""
         with self._lock:
             lines = self._read_lines(file_key)
+            cat_lines = self._read_lines("categories")
+        # Build category name lookup
+        cat_names = {}
+        for line in cat_lines:
+            try:
+                data = json.loads(line)
+                if "category_id" in data:
+                    cat_names[data["category_id"]] = data.get("category_name", "")
+            except json.JSONDecodeError:
+                continue
         states = {}
         for line in lines:
             try:
@@ -112,6 +122,9 @@ class Storage:
         for post_id, state in states.items():
             derived = STATUS_MAP.get(state.get("type", ""), "")
             if derived == status:
+                # Backfill category_name if missing
+                if "category_name" not in state and "category_id" in state:
+                    state["category_name"] = cat_names.get(state["category_id"], "")
                 results.append(state)
         return results
 
