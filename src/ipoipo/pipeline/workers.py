@@ -1,5 +1,6 @@
 """One-at-a-time, atomically claimed work; failures never spin indefinitely."""
 import logging
+import threading
 from dataclasses import dataclass
 from typing import Callable
 
@@ -28,6 +29,18 @@ def drain_stage(repository: Repository, stage: str, owner: str,
         if not tasks:
             break  # future retry_wait work is left for the next run, not busy-spun
         task = tasks[0]
+        stop_heartbeat = threading.Event()
+
+        def heartbeat() -> None:
+            interval = max(0.5, min(30.0, lease_seconds / 3))
+            while not stop_heartbeat.wait(interval):
+                try:
+                    repository.renew_lease(task, lease_seconds)
+                except RuntimeError:
+                    break
+
+        thread = threading.Thread(target=heartbeat, name=f"lease-{task.id}", daemon=True)
+        thread.start()
         try:
             action(task)
             result.succeeded += 1
@@ -40,4 +53,7 @@ def drain_stage(repository: Repository, stage: str, owner: str,
                 result.retry_wait += 1
             else:
                 result.failed += 1
+        finally:
+            stop_heartbeat.set()
+            thread.join(timeout=2)
     return result
