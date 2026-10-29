@@ -6,6 +6,7 @@ import sys
 
 from ipoipo.observability.logging import configure_logging
 from ipoipo.persistence.event_log import export_events
+from ipoipo.persistence.legacy_import import import_legacy
 from ipoipo.pipeline.runner import PipelineRunner
 from ipoipo.settings import Settings
 
@@ -25,6 +26,7 @@ def make_parser() -> argparse.ArgumentParser:
     p.add_argument("--no-proxy", action="store_true")
     p.add_argument("--keep-zip", action="store_true")
     p.add_argument("--export-events", type=Path)
+    p.add_argument("--import-legacy", action="store_true")
     p.add_argument("--verbose", action="store_true")
     return p
 
@@ -50,6 +52,8 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(result, ensure_ascii=False, indent=2))
         else:
             result = {}
+            if args.import_legacy:
+                result["legacy_import"] = import_legacy(args.data_dir, runner.repository)
             if args.retry:
                 result["retry_reset"] = runner.repository.retry_failed()
             if args.stage1:
