@@ -18,10 +18,21 @@ class Settings:
     max_attempts: int = 3
     lease_seconds: int = 900
     proxy_url: str | None = None
+    proxy_controller_url: str | None = None
+    proxy_group: str | None = None
+    proxy_node: str | None = None
+    proxy_controller_token: str | None = None
+    check_proxy_egress: bool = False
     keep_zip: bool = False
     allowed_hosts: tuple[str, ...] = ("ipoipo.cn", "ipo.ai-tag.cn")
 
     def __post_init__(self) -> None:
+        if (self.proxy_node or self.proxy_group) and not (
+            self.proxy_url and self.proxy_controller_url and self.proxy_group and self.proxy_node
+        ):
+            raise ValueError("Proxy selection requires URL, controller URL, group and node")
+        if self.check_proxy_egress and not self.proxy_url:
+            raise ValueError("Egress check requires an explicit proxy URL")
         if self.min_delay_seconds < 0 or self.request_timeout <= 0 or self.download_timeout <= 0:
             raise ValueError("Invalid HTTP timing settings")
         if min(self.max_html_bytes, self.max_archive_bytes, self.max_uncompressed_bytes,

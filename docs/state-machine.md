@@ -29,3 +29,7 @@ Connection errors, timeouts, 429 and 5xx are retryable. 401, 403, 404, 410, untr
 ## Paging
 
 Checkpoint next_page is updated after every successful page. Completed categories have (next_page=1, complete=true). --resume continues unfinished categories; --incremental intentionally starts again at page 1 and upsert preserves existing work.
+
+## Category discovery lease (v3.1)
+
+Category ownership is independent of resolve/download tasks. Owner A acquires category C; owner B sees it busy; A saves checkpoints only while the lease is live. A crashed producer loses its expired lease to B, and its subsequent checkpoint writes are fenced out. The lease is always released in a `finally` block on normal completion. Audit events `category_claimed` and `category_released` are recorded in SQLite.

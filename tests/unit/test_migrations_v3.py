@@ -6,11 +6,11 @@ from ipoipo.persistence.sqlite import Database
 def test_schema_version_and_reopen(tmp_path):
     db_file = tmp_path / "db.sqlite3"
     db = Database(db_file)
-    assert db.conn.execute("PRAGMA user_version").fetchone()[0] == 1
+    assert db.conn.execute("PRAGMA user_version").fetchone()[0] == 2
     db.close()
     reopened = Database(db_file)
     try:
-        assert reopened.conn.execute("PRAGMA user_version").fetchone()[0] == 1
+        assert reopened.conn.execute("PRAGMA user_version").fetchone()[0] == 2
     finally:
         reopened.close()
 

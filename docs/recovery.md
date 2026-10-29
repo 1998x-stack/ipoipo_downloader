@@ -25,3 +25,17 @@ Import retains report metadata and validated download URLs but deliberately does
 - Crash after filesystem commit before database commit: verified manifest is reused on next attempt.
 - Lost final file: recovery detects mismatch and requeues download.
 - Multi-process scheduling: use one listing producer per category, though downloaded task claims are transactionally exclusive.
+
+## v3.1 category lease recovery
+
+If a category producer crashes, its lease expires after the configured TTL. A new producer can acquire the same category and resume from the last committed next_page. An old producer that wakes up cannot update the checkpoint because `save_checkpoint(owner=...)` checks current ownership and expiry. A busy category is skipped and counted explicitly.
+
+A completed category checkpoint is never manually reset during an active category lease. Report and task UPSERT operations are idempotent to tolerate page re-fetches after crashes.
+
+## Offline legacy archive migration
+
+`ipoipo --extract --archive-dir data/downloads` walks existing ZIPs, rejects archive symlinks, validates ZIP safety and document signatures, hashes and stages documents, publishes immutable manifests, and records success/failure audit events in SQLite. It does **not** delete source archives or incorrectly mark an old JSONL download status as verified.
+
+## Proxy operational boundaries
+
+To make an authorized controller selection, supply a loopback-only controller URL and a specific group/node. Verify a reported selection through the API; optionally observe the actual public exit IP through the configured proxy using `--check-proxy-egress`. IP-echo verification uses a third-party service and is opt-in. An HTTP 403 remains a terminal source response, not a trigger to change nodes.

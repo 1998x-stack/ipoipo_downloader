@@ -42,3 +42,25 @@ Tests use synthetic HTML and ZIP fixtures; live browsing is deliberately exclude
 ## Not yet production-certified
 
 Live website contract checks, multi-day soak tests, large-volume benchmarks, full static typing, versioned migrations beyond bootstrap, automatic source category discovery, and distributed discovery leases are future work.
+
+## v3.1 operator actions
+
+```bash
+# Get counts from canonical SQLite even when launched outside the repo
+bash scripts/stats.sh data
+
+# Check a category checkpoint while preventing simultaneous listing producers
+ipoipo --stage2 --category 85 --resume --max-pages 5
+
+# Import up to 10 old archives without deleting the original files
+ipoipo --extract --archive-dir data/downloads --max-reports 10
+
+# Explicit local proxy state selection, no implicit retries via rotation
+IPOIPO_PROXY_CONTROLLER_TOKEN="..." ipoipo --stats \
+  --proxy-url http://127.0.0.1:7890 \
+  --proxy-controller-url http://127.0.0.1:9090 \
+  --proxy-group GLOBAL --proxy-node NODE_A
+```
+
+The timeout/expiry of a category lease is configured via `Settings.lease_seconds`.
+Do not run multiple independent discovery coordinators without upgrading to v3.1; older deployments are not protected. A controller's selected node is not proof of egress IP unless an explicit diagnostic probe is run.

@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Iterator
 
 SCHEMA = files("ipoipo.persistence.migrations").joinpath("0001_initial.sql").read_text(encoding="utf-8")
+SCHEMA_V2 = files("ipoipo.persistence.migrations").joinpath("0002_category_leases.sql").read_text(encoding="utf-8")
 
 
 class Database:
@@ -21,11 +22,32 @@ class Database:
             self.conn.execute("PRAGMA busy_timeout=30000")
             self.conn.execute("PRAGMA foreign_keys=ON")
             current_version = int(self.conn.execute("PRAGMA user_version").fetchone()[0])
-            if current_version > 1:
+            if current_version > 2:
+                self.conn.close()
                 raise RuntimeError(f"Unsupported newer SQLite schema version: {current_version}")
-            self.conn.executescript(SCHEMA)
-            if current_version == 0:
-                self.conn.execute("PRAGMA user_version=1")
+            # Idempotent bootstrap; migrations are guarded by an exclusive write
+            # transaction to prevent two processes racing over the version.
+            self.conn.execute("BEGIN IMMEDIATE")
+            try:
+                if current_version == 0:
+                    sql = "\n".join(line for line in SCHEMA.splitlines()
+                                    if not line.lstrip().startswith("--"))
+                    for statement in sql.split(";"):
+                        if statement.strip():
+                            self.conn.execute(statement)
+                    self.conn.execute("PRAGMA user_version=1")
+                if current_version < 2:
+                    sql = "\n".join(line for line in SCHEMA_V2.splitlines()
+                                    if not line.lstrip().startswith("--"))
+                    for statement in sql.split(";"):
+                        if statement.strip():
+                            self.conn.execute(statement)
+                    self.conn.execute("PRAGMA user_version=2")
+                self.conn.commit()
+            except BaseException:
+                self.conn.rollback()
+                self.conn.close()
+                raise
 
     @contextmanager
     def transaction(self) -> Iterator[sqlite3.Connection]:
