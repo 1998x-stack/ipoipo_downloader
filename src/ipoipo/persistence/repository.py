@@ -86,14 +86,16 @@ class Repository:
                 ORDER BY c.category_id LIMIT 1""", (post_id,)).fetchone()
         return dict(row) if row else None
 
-    def claim(self, stage: str, owner: str, *, limit: int = 1, lease_seconds: int = 300) -> list[Task]:
+    def claim(self, stage: str, owner: str, *, limit: int = 1, lease_seconds: int = 300, category_id: str | None = None) -> list[Task]:
         if limit < 1 or lease_seconds < 1 or not owner:
             raise ValueError("Invalid claim arguments")
         now = time.time()
         with self.db.transaction() as c:
             rows = c.execute("""SELECT id,post_id,stage,attempts,max_attempts FROM tasks
                 WHERE stage=? AND status IN ('pending','retry_wait') AND available_at<=?
-                ORDER BY available_at,id LIMIT ?""", (stage, now, limit)).fetchall()
+                AND (? IS NULL OR EXISTS (SELECT 1 FROM report_categories rc
+                    WHERE rc.post_id=tasks.post_id AND rc.category_id=?))
+                ORDER BY available_at,id LIMIT ?""", (stage, now, category_id, category_id, limit)).fetchall()
             result = []
             for r in rows:
                 c.execute("""UPDATE tasks SET status='running', attempts=attempts+1,
