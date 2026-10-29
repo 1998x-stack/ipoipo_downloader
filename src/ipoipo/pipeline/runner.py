@@ -15,12 +15,28 @@ from ipoipo.sources.ipoipo_cn.categories import BASE_URL, CATEGORY_NAMES
 from ipoipo.sources.ipoipo_cn.listing import ListingClient
 from ipoipo.sources.ipoipo_cn.resolver import Resolver
 from ipoipo.transport.http import HttpClient
+from ipoipo.transport.proxy import ClashController, ProxyEndpoint, observe_egress_ip
 
 
 class PipelineRunner:
     def __init__(self, settings: Settings):
         self.settings = settings
         self.repository = Repository(settings.database_path)
+        self.proxy_diagnostics: dict[str, str] = {}
+        if settings.proxy_node and settings.proxy_group and settings.proxy_controller_url:
+            controller = ClashController(
+                settings.proxy_controller_url, token=settings.proxy_controller_token
+            )
+            try:
+                self.proxy_diagnostics["selected_node"] = controller.select(
+                    settings.proxy_group, settings.proxy_node
+                )
+            finally:
+                controller.close()
+        if settings.check_proxy_egress and settings.proxy_url:
+            self.proxy_diagnostics["observed_egress_ip"] = observe_egress_ip(
+                ProxyEndpoint(settings.proxy_url)
+            )
         self.http = HttpClient(settings)
         self.listing = ListingClient(self.http)
         self.resolver = Resolver(self.http)
