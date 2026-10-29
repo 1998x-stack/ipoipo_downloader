@@ -1,65 +1,34 @@
-# AGENTS.md — ipoipo Downloader
+# AGENTS.md — v3 Engineering Contract
 
-Python 3.10+ scraper/downloader for IPO industry reports from [ipoipo.cn](https://ipoipo.cn).
+Python >=3.11, src-layout package `ipoipo`. The v3 code is under `src/ipoipo/`; legacy top-level modules are retained temporarily. Avoid adding new logic to legacy modules.
 
-## Commands
+## Core commands
 
 ```bash
-pip install -r requirements.txt          # setup
-python main.py --full --max-pages 2 --max-reports 10  # test run (full pipeline, limited)
-python main.py --full --resume           # resume from checkpoint
-python -m pytest                         # run all 44 tests
-python -m pytest tests/test_storage.py   # run single module
-bash scripts/stats.sh                    # quick pipeline stats
+python -m pip install -e ".[dev,legacy]"
+ruff check src/ipoipo --select E4,E7,E9,F
+python -m pytest tests -q
+python main.py --stage1 --data-dir /tmp/ipoipo-test
+python main.py --stats --data-dir /tmp/ipoipo-test
 ```
 
-## Architecture
+## Non-negotiable invariants
 
-4-stage pipeline, flat module layout (no packages):
+1. No success state before verified files and manifest are atomically published.
+2. Each report identity is stable and repeated discovery never resets completed tasks.
+3. Failures have bounded retries and explicit terminal states; no infinite retry loop.
+4. SQLite task claims and changes use transactions; worker ownership checked before transitions.
+5. ZIP members must be size bounded, path-safe and not symlinks.
+6. File extensions reflect actual document types; never overwrite two attachments with a common generated name.
+7. HTTP must validate HTTPS allowlist and every redirect. Do not attempt to circumvent authentication or authorization.
+8. CI uses offline fixtures only; never require live website requests to run tests.
+9. A missing artifact or expired lease must recover to an explicit, auditable state.
+10. CLI options preserve clear budget and category semantics.
 
-| File | Role |
-|------|------|
-| `main.py` | CLI + parallel orchestration (threading) |
-| `scraper.py` | Stages 1-3: category discovery, report listing, URL extraction |
-| `downloader.py` | Stage 4: ZIP download, extraction, rename |
-| `storage.py` | Append-only JSONL event log; status derived from last event per `post_id` |
-| `logger.py` | Dual output: colored console + JSONL file |
-| `proxy.py` | Clash YAML parsing, SS-only node selection, auto-switch on 403 |
-| `config.py` | All constants + `USE_PROXY` env var (default `true`) |
-| `utils/` | `headers.py`, `sanitize.py`, `helpers.py` (retry decorator, jitter sleep) |
+## Review checklist
 
-## Storage
-
-JSONL files in `data/` — **append-only, no compaction**:
-- `categories.jsonl` — discovered categories
-- `reports.jsonl` — report events (`report_found` → `url_found` → `download_completed`/`download_failed`)
-- `downloads.jsonl` — download events
-- `progress.json` — per-category/page checkpoint for `--resume`
-
-Status is **derived** from the last event type per `post_id`, not stored explicitly. `query_by_status()` reads the entire file into memory on every call.
-
-## Key Constraints
-
-- **`config/proxy.yaml` is gitignored** — must be provided by user (Clash format). Falls back to no-proxy if missing/Clash not running.
-- **Only SS (Shadowsocks) proxy nodes** are loaded from Clash config; vmess/trojan/hysteria are silently ignored.
-- **Anti-hotlinking bypass**: ZIP files on `ipo.ai-tag.cn` require a valid Referer from `ipoipo.cn/download/{post_id}.html`. The sequence is: visit download page → wait 0.5-1s → download with Referer header → validate Content-Type is not `text/html`.
-- **Full crawl without limits takes 2+ hours** (3000+ pages across 38 categories). Always use `--max-pages` for testing.
-- **`--category` flag is parsed but not fully wired** in all stages — known gap.
-- **Multi-doc ZIPs**: if a ZIP contains multiple documents, they all get renamed to the same filename — later ones overwrite earlier ones.
-
-## Testing
-
-- 44 tests across 6 modules using `unittest` (pytest-compatible discovery).
-- Tests use mocks — no network calls.
-- Write tests for new functionality; ensure all pass before committing.
-
-## Code Style
-
-- Black formatting, Ruff linting (no config files — use defaults).
-- No type-checking config; some type hints exist but are not enforced.
-
-## Docs
-
-- `docs/gotchas.md` — detailed known issues and edge cases
-- `docs/changelog.md` — v2.0 redesign history (SQLite → JSONL migration)
-- `docs/ipoipo-website-reference.md` — website structure reference
+- Include a regression test for each behavioral change and each error path.
+- Run static checks and tests locally or on CI before marking as verified.
+- Update architecture/data-contract/recovery docs when changing state or storage.
+- Retain backward compatibility where feasible; document breaking changes.
+- Never commit downloaded datasets, credential-bearing proxy configs or runtime databases.

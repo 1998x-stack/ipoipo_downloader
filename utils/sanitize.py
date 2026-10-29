@@ -12,7 +12,7 @@ from typing import Optional
 
 # 匹配文件名中的非法字符：ASCII 特殊字符 + 中文标点符号
 # 包括：<>:"/\|?* 以及 【】（）《》""''：；，。！？ 和方括号
-ILLEGAL_CHARS: str = r'[<>:"/\\|?*【】（）《》""''：；，。！？\[\]]'
+ILLEGAL_CHARS: str = r"""[<>:"/\\|?*【】（）《》：；，。！？\[\]']"""
 
 
 def clean_filename(name: str, max_length: int = 200) -> str:
@@ -102,7 +102,7 @@ def clean_foldername(name: str) -> str:
 
 
 def extract_timestamp_from_zip(filename: str) -> str:
-    """Extract an 8-digit date (YYYYMMDD) from a ZIP filename.
+    r"""Extract an 8-digit date (YYYYMMDD) from a ZIP filename.
 
     Tries four patterns in order of specificity:
     1. ``^(\d{8})`` — 8 digits at the start (e.g., ``20251202...``)
