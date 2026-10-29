@@ -36,3 +36,11 @@ The client restricts targets to configured HTTPS hosts and checks each redirect.
 ## Performance strategy
 
 Keep one request stream per worker initially. Add measured parallelism only after state invariants and source rate policies are validated. Index queries use (stage,status,available_at). Audit event exports are explicit, not per-query full-file scans.
+
+## v3.1 concurrency semantics
+
+`category_leases(category_id PRIMARY KEY, owner, lease_until, updated_at)` is introduced in schema migration 0002. A listing producer claims its category using `BEGIN IMMEDIATE` before reading or updating the checkpoint. Lease expiry enables crash takeover; a heartbeat renews the lease during page requests. Every production checkpoint write checks owner and expiry in the same transaction. Another producer receives `busy_categories` rather than racing to advance pagination.
+
+Task leases and category leases are separate. The offline legacy ZIP importer uses the validated artifact pipeline but deliberately has no logical downloaded-report task until a verified source identifier can be established.
+
+Local Clash/Mihomo controller selection validates its reported choice. Optional egress observation is a separate HTTP request via the configured explicit proxy, not a claim that controller state equals network state.

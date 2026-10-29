@@ -1,8 +1,8 @@
-# ipoipo Downloader v3
+# ipoipo Downloader v3.1
 
 Reliable, incremental and auditable acquisition of industry research reports published through **ipoipo.cn**.
 
-> **Status:** v3 implementation under review. Use an authorized source and follow the website's terms and rate limits. The software does not bypass authorization controls.
+> **Status:** v3.1 stabilization in review. Use an authorized source and follow the website's terms and rate limits. The software does not bypass authorization controls.
 
 ## What changed
 
@@ -87,3 +87,32 @@ Read [Architecture](docs/architecture.md), [Data Contracts](docs/data-contracts.
 - Legacy completed downloads are not automatically trusted as valid v3 artifacts.
 
 MIT License.
+
+## v3.1 Reliability hardening
+
+- **Cross-process listing coordination**: SQLite category leases protect pagination; stale leases can be recovered and a lost owner cannot write its checkpoint.
+- **Explicit local proxy control**: an authorized local Clash/Mihomo controller may select a requested node; the reported selection is verified. No automatic node switching on 401/403/429.
+- **Optional external egress observation**: `--check-proxy-egress` contacts `api.ipify.org` *through the configured proxy*. This sends the proxy's observed public IP to that service and must be explicitly enabled. A selected node alone is not proof of a changed external IP.
+- **Safe legacy ZIP extraction**: `python main.py --extract` and `ipoipo --extract` now run the same bounded ZIP checks and manifest validation. Original archives remain unchanged and verified imports live in `data/downloads-v3/legacy-archives/<sha256-prefix>/`.
+- **Canonical stats**: `bash scripts/stats.sh [DATA_DIR]` invokes `main.py --stats` against SQLite, rather than counting JSONL lines.
+
+### Optional proxy selection and diagnosis
+
+```bash
+export IPOIPO_PROXY_CONTROLLER_TOKEN="<controller-api-token>"
+ipoipo --stats --proxy-url http://127.0.0.1:7890 \
+  --proxy-controller-url http://127.0.0.1:9090 \
+  --proxy-group GLOBAL --proxy-node "NODE_A"
+ipoipo --stats --proxy-url http://127.0.0.1:7890 --check-proxy-egress
+```
+
+The controller endpoint must be bound to loopback. Never use node selection to circumvent source authorization or rate restrictions.
+
+### Migrate old ZIPs without redownloading
+
+```bash
+ipoipo --extract --archive-dir data/downloads --data-dir data --max-reports 10
+python main.py --extract --category 85 --max-reports 10
+```
+
+Archive imports are catalogued by content hash, not assumed to be valid downloaded report tasks. Damaged archives produce errors and a nonzero CLI exit code. The original ZIP files are preserved even when `--keep-zip` is not set; that flag only controls the copy retained with the verified output.

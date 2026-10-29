@@ -32,3 +32,12 @@ python main.py --stats --data-dir /tmp/ipoipo-test
 - Update architecture/data-contract/recovery docs when changing state or storage.
 - Retain backward compatibility where feasible; document breaking changes.
 - Never commit downloaded datasets, credential-bearing proxy configs or runtime databases.
+
+## v3.1 stability invariants
+
+- A listing producer must acquire a category lease before fetching a category or changing its checkpoint.
+- The old producer may not write a checkpoint after another worker claims an expired lease.
+- Never route `main.py --extract` to the unvalidated old `downloader.py` implementation.
+- The local archive importer must never delete original ZIPs or declare them verified without a manifest.
+- Proxy selection is explicit, controller URLs must be loopback-only, and IP echo verification is opt-in; do not rotate proxies to evade source denials.
+- Use `bash scripts/stats.sh` or `ipoipo --stats` for canonical SQLite metrics; JSONL line counts are not task counts.
