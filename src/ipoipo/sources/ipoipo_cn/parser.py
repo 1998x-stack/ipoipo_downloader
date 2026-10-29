@@ -17,10 +17,14 @@ def parse_listing(html: str, category_id: str, category_name: str) -> list[Repor
         link = card.select_one("h2.multi-ellipsis a[href]")
         if not link:
             continue
-        match = re.search(r"/post/(\d+)\.html", link.get("href", ""))
+        href = link.get("href")
+        if not isinstance(href, str):
+            continue
+        match = re.search(r"/post/(\d+)\.html", href)
         if not match:
             continue
-        title = (link.get("title") or link.get_text(strip=True)).strip()
+        raw_title = link.get("title")
+        title = (raw_title if isinstance(raw_title, str) else link.get_text(strip=True)).strip()
         if not title:
             continue
         img = card.select_one("img.img-cover")
@@ -28,12 +32,14 @@ def parse_listing(html: str, category_id: str, category_name: str) -> list[Repor
         views = card.select_one("span.view-num")
         date = card.select_one("span.edit")
         count = re.search(r"\d+", views.get_text(strip=True)) if views else None
+        thumbnail = img.get("src") if img else ""
+        thumbnail = thumbnail if isinstance(thumbnail, str) else ""
         reports.append(Report(
             post_id=match.group(1), title=title, category_id=category_id,
             category_name=category_name,
             detail_url=f"https://ipoipo.cn/post/{match.group(1)}.html",
             publish_date=date.get_text(strip=True) if date else "",
-            thumbnail_url=img.get("src", "") if img else "",
+            thumbnail_url=thumbnail,
             description=desc.get_text(strip=True) if desc else "",
             view_count=int(count.group(0)) if count else 0))
     if cards and not reports:
