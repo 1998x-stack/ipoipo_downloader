@@ -1,74 +1,12 @@
 """SQLite schema, WAL and explicit transaction boundaries."""
 import sqlite3
+from importlib.resources import files
 import threading
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator
 
-SCHEMA = """
-CREATE TABLE IF NOT EXISTS categories (
-  category_id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  source_url TEXT NOT NULL
-);
-CREATE TABLE IF NOT EXISTS reports (
-  post_id TEXT PRIMARY KEY,
-  title TEXT NOT NULL,
-  detail_url TEXT NOT NULL,
-  publish_date TEXT NOT NULL DEFAULT '',
-  thumbnail_url TEXT NOT NULL DEFAULT '',
-  description TEXT NOT NULL DEFAULT '',
-  view_count INTEGER NOT NULL DEFAULT 0,
-  download_url TEXT,
-  discovered_at REAL NOT NULL,
-  updated_at REAL NOT NULL
-);
-CREATE TABLE IF NOT EXISTS report_categories (
-  post_id TEXT NOT NULL REFERENCES reports(post_id),
-  category_id TEXT NOT NULL REFERENCES categories(category_id),
-  PRIMARY KEY(post_id, category_id)
-);
-CREATE TABLE IF NOT EXISTS tasks (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  post_id TEXT NOT NULL REFERENCES reports(post_id),
-  stage TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'pending',
-  attempts INTEGER NOT NULL DEFAULT 0,
-  max_attempts INTEGER NOT NULL DEFAULT 3,
-  available_at REAL NOT NULL DEFAULT 0,
-  owner TEXT,
-  lease_until REAL,
-  last_error TEXT,
-  updated_at REAL NOT NULL,
-  UNIQUE(post_id, stage)
-);
-CREATE INDEX IF NOT EXISTS idx_tasks_claim ON tasks(stage, status, available_at);
-CREATE INDEX IF NOT EXISTS idx_tasks_expired ON tasks(status, lease_until);
-CREATE TABLE IF NOT EXISTS crawl_checkpoints (
-  category_id TEXT PRIMARY KEY REFERENCES categories(category_id),
-  next_page INTEGER NOT NULL DEFAULT 1,
-  complete INTEGER NOT NULL DEFAULT 0,
-  updated_at REAL NOT NULL
-);
-CREATE TABLE IF NOT EXISTS artifacts (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  post_id TEXT NOT NULL REFERENCES reports(post_id),
-  path TEXT NOT NULL,
-  sha256 TEXT NOT NULL,
-  size INTEGER NOT NULL,
-  media_type TEXT NOT NULL,
-  UNIQUE(post_id, path)
-);
-CREATE TABLE IF NOT EXISTS events (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  ts REAL NOT NULL,
-  type TEXT NOT NULL,
-  post_id TEXT,
-  stage TEXT,
-  details TEXT NOT NULL DEFAULT '{}'
-);
-CREATE INDEX IF NOT EXISTS idx_events_post ON events(post_id, id);
-"""
+SCHEMA = files("ipoipo.persistence.migrations").joinpath("0001_initial.sql").read_text(encoding="utf-8")
 
 
 class Database:
@@ -82,7 +20,12 @@ class Database:
             self.conn.execute("PRAGMA journal_mode=WAL")
             self.conn.execute("PRAGMA busy_timeout=30000")
             self.conn.execute("PRAGMA foreign_keys=ON")
+            current_version = int(self.conn.execute("PRAGMA user_version").fetchone()[0])
+            if current_version > 1:
+                raise RuntimeError(f"Unsupported newer SQLite schema version: {current_version}")
             self.conn.executescript(SCHEMA)
+            if current_version == 0:
+                self.conn.execute("PRAGMA user_version=1")
 
     @contextmanager
     def transaction(self) -> Iterator[sqlite3.Connection]:
