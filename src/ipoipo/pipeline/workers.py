@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from typing import Callable
 
 from ipoipo.domain.models import Task
+from ipoipo.artifacts.validator import ArtifactError
+from ipoipo.sources.ipoipo_cn.parser import ParseError
 from ipoipo.persistence.repository import Repository
 
 
@@ -45,7 +47,7 @@ def drain_stage(repository: Repository, stage: str, owner: str,
             action(task)
             result.succeeded += 1
         except Exception as exc:
-            retryable = getattr(exc, "retryable", not isinstance(exc, (ValueError, PermissionError)))
+            retryable = getattr(exc, "retryable", not isinstance(exc, (ValueError, PermissionError, ArtifactError, ParseError)))
             logging.getLogger(__name__).warning("task failed: stage=%s post=%s reason=%s",
                                                 stage, task.post_id, exc)
             outcome = repository.failed(task, str(exc), retryable=retryable)
