@@ -5,7 +5,6 @@ from typing import Callable
 
 from ipoipo.domain.models import Task
 from ipoipo.persistence.repository import Repository
-from ipoipo.transport.http import FetchError
 
 
 @dataclass
