@@ -1,0 +1,4 @@
+-- Schema bootstrap is currently in src/ipoipo/persistence/sqlite.py.
+-- Canonical schema tables: categories, reports, report_categories, tasks,
+-- crawl_checkpoints, artifacts, events. Migration version: 1.
+-- Future migrations MUST be applied transactionally with PRAGMA user_version.
