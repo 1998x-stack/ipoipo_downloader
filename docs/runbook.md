@@ -5,7 +5,7 @@
 Requires Python 3.11+.
 
 ```bash
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[dev,legacy]"
 ipoipo --stage1 --data-dir data
 ipoipo --full --category 85 --max-pages 2 --max-reports 5 --no-proxy
 ipoipo --stats
@@ -35,9 +35,9 @@ Use small `--max-pages` for smoke testing. Respect site policies and resource li
 ## CI
 
 `ruff check src/ipoipo --select E4,E7,E9,F`
-`python -m pytest tests/unit tests/integration tests/e2e tests/property -q`
+`python -m pytest tests -q`
 
-Tests use synthetic HTML and ZIP fixtures; live browsing is deliberately excluded from CI.
+Tests use synthetic HTML and ZIP fixtures; live browsing is deliberately excluded from CI.\nThe CI runs both the new v3 tests and the old legacy test modules.
 
 ## Not yet production-certified
 
