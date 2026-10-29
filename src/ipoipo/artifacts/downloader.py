@@ -1,9 +1,7 @@
 """Download to staging, verify ZIP, safely extract, then atomically publish."""
-import json
 import os
 import shutil
 import tempfile
-import zipfile
 from pathlib import Path
 
 import requests
