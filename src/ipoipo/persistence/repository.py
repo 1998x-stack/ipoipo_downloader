@@ -112,6 +112,17 @@ class Repository:
         if row is None or row["status"] != "running" or row["owner"] != task.owner:
             raise RuntimeError("Task lease not owned or no longer running")
 
+    def renew_lease(self, task: Task, lease_seconds: int) -> None:
+        """Extend an owned running task; prevents long downloads from being stolen."""
+        if lease_seconds < 1:
+            raise ValueError("lease_seconds must be positive")
+        with self.db.transaction() as c:
+            changed = c.execute("""UPDATE tasks SET lease_until=?,updated_at=?
+                WHERE id=? AND owner=? AND status='running'""",
+                (time.time() + lease_seconds, time.time(), task.id, task.owner))
+            if changed.rowcount != 1:
+                raise RuntimeError("Lost task lease")
+
     def resolved(self, task: Task, url: str) -> None:
         with self.db.transaction() as c:
             self._owned(c, task)
