@@ -9,7 +9,11 @@ from ipoipo.transport.http import FetchError, HttpClient, validate_url
 
 def find_archive_url(html: str, base_url: str, allowed_hosts: tuple[str, ...]) -> str:
     soup = BeautifulSoup(html, "lxml")
-    candidates = [link.get("href", "") for link in soup.select("a[href]")]
+    candidates: list[str] = []
+    for link in soup.select("a[href]"):
+        href = link.get("href")
+        if isinstance(href, str):
+            candidates.append(href)
     candidates += re.findall(r'https?://[^\s<>"\x27]+?\.zip(?:\?[^\s<>"\x27]*)?', html, re.I)
     for raw in candidates:
         url = urljoin(base_url, raw.strip())
