@@ -1,13 +1,15 @@
 import io
 import zipfile
+from pathlib import Path
 
 from ipoipo.pipeline.runner import PipelineRunner
 from ipoipo.settings import Settings
 
 
-HTML = """<div class="wapost card"><h2 class="multi-ellipsis">
-<a title="研究报告" href="https://ipoipo.cn/post/26028.html">研究报告</a>
-</h2></div>"""
+FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
+HTML = (FIXTURES / "category_page.html").read_text(encoding="utf-8")
+DOWNLOAD_HTML = (FIXTURES / "download_page.html").read_text(encoding="utf-8")
+EMPTY_HTML = (FIXTURES / "empty_page.html").read_text(encoding="utf-8")
 
 
 class FakeResponse:
@@ -32,9 +34,9 @@ def test_full_pipeline_and_incremental_no_redownload(tmp_path):
             counts["listing"] += 1
             return HTML
         if "/tags-85_2.html" in url:
-            return "<html><body>No more reports</body></html>"
+            return EMPTY_HTML
         if "/download/26028.html" in url:
-            return '<a href="https://ipo.ai-tag.cn/report.zip">Download</a>'
+            return DOWNLOAD_HTML
         raise AssertionError(url)
 
     def stream_response(url, **kwargs):
@@ -66,7 +68,7 @@ def test_missing_artifact_requeued_on_next_run(tmp_path):
     runner = PipelineRunner(Settings(data_dir=tmp_path, min_delay_seconds=0))
     runner.http.get_html = lambda url, **kw: (
         HTML if "/tags-85.html" in url else
-        '<a href="https://ipo.ai-tag.cn/report.zip">Download</a>'
+        DOWNLOAD_HTML
         if "/download/" in url else "<html></html>")
     runner.http.get = lambda *a, **kw: FakeResponse(stream.getvalue())
     try:
