@@ -1,0 +1,23 @@
+name: CI
+on:
+  push:
+    branches: [main, "feat/**"]
+  pull_request:
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install -e ".[dev]"
+      - name: Ruff syntax and correctness
+        run: ruff check src/ipoipo --select E4,E7,E9,F
+      - name: Unit and integration regressions
+        run: python -m pytest tests/unit tests/integration tests/e2e tests/property -q
+      - name: CLI smoke test
+        run: ipoipo --help
