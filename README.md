@@ -19,7 +19,7 @@ Reliable, incremental and auditable acquisition of industry research reports pub
 ## Quick start
 
 ```bash
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[dev,legacy]"
 ipoipo --stage1
 ipoipo --full --category 85 --max-pages 2 --max-reports 5 --no-proxy
 ipoipo --stats
@@ -71,7 +71,7 @@ The SQLite store manages current state. A succeeded download requires a verified
 ```bash
 python -m pip install -e ".[dev]"
 ruff check src/ipoipo --select E4,E7,E9,F
-python -m pytest tests/unit tests/integration tests/e2e tests/property -q
+python -m pytest tests -q
 ```
 
 ## Design and operations
