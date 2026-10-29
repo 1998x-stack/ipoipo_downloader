@@ -17,6 +17,8 @@ jobs:
       - run: python -m pip install -e ".[dev]"
       - name: Ruff syntax and correctness
         run: ruff check src/ipoipo --select E4,E7,E9,F
+      - name: Type checking
+        run: pyright src/ipoipo
       - name: Unit and integration regressions
         run: python -m pytest tests/unit tests/integration tests/e2e tests/property -q
       - name: CLI smoke test
