@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ipoipo-downloader"
-version = "3.0.0"
+version = "3.1.0"
 description = "Reliable, recoverable and auditable industry report acquisition pipeline"
 requires-python = ">=3.11"
 dependencies = ["requests>=2.31", "beautifulsoup4>=4.12", "lxml>=4.9"]

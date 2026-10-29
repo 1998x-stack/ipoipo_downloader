@@ -1,5 +1,6 @@
 """Four-stage reliable pipeline, with explicit errors and incremental checkpoints."""
 import logging
+import threading
 import uuid
 from typing import Any
 
@@ -44,30 +45,52 @@ class PipelineRunner:
         categories = self.repository.categories(category_id)
         if not categories:
             raise ValueError(f"Unknown category {category_id}")
+        summary["busy_categories"] = 0
         for category in categories:
             cid, name = category["category_id"], category["name"]
-            next_page, complete = self.repository.checkpoint(cid)
-            if incremental:
-                next_page, complete = 1, False
-            elif not resume:
-                next_page, complete = 1, False
-            if resume and complete and not incremental:
+            owner = "crawl-" + uuid.uuid4().hex
+            if not self.repository.acquire_category_lease(cid, owner, self.settings.lease_seconds):
+                summary["busy_categories"] += 1
+                self.log.info("Category %s claimed by another producer; skipping", cid)
                 continue
-            page = next_page
-            count = 0
-            while max_pages is None or count < max_pages:
-                data = with_retries(lambda: self.listing.page(cid, name, page),
-                                    self.settings.max_attempts)
-                if data.is_end:
-                    self.repository.save_checkpoint(cid, 1, complete=True)
-                    break
-                for report in data.reports:
-                    summary["new_reports"] += int(self.repository.upsert_report(report))
-                page += 1
-                count += 1
-                summary["pages"] += 1
-                self.repository.save_checkpoint(cid, page, complete=False)
-            summary["categories"] += 1
+            stop_heartbeat = threading.Event()
+
+            def heartbeat() -> None:
+                interval = max(0.5, min(30.0, self.settings.lease_seconds / 3))
+                while not stop_heartbeat.wait(interval):
+                    try:
+                        self.repository.renew_category_lease(cid, owner, self.settings.lease_seconds)
+                    except RuntimeError:
+                        return
+
+            thread = threading.Thread(target=heartbeat, name=f"crawl-lease-{cid}", daemon=True)
+            thread.start()
+            try:
+                next_page, complete = self.repository.checkpoint(cid)
+                if incremental or not resume:
+                    next_page, complete = 1, False
+                if resume and complete and not incremental:
+                    continue
+                page = next_page
+                count = 0
+                while max_pages is None or count < max_pages:
+                    data = with_retries(lambda: self.listing.page(cid, name, page),
+                                        self.settings.max_attempts)
+                    if data.is_end:
+                        self.repository.save_checkpoint(cid, 1, complete=True, owner=owner)
+                        break
+                    for report in data.reports:
+                        summary["new_reports"] += int(self.repository.upsert_report(report))
+                    page += 1
+                    count += 1
+                    summary["pages"] += 1
+                    # Ownership and checkpoint write are validated in one transaction.
+                    self.repository.save_checkpoint(cid, page, complete=False, owner=owner)
+                summary["categories"] += 1
+            finally:
+                stop_heartbeat.set()
+                thread.join(timeout=2)
+                self.repository.release_category_lease(cid, owner)
         return summary
 
     def resolve_pending(self, *, limit: int | None = None,

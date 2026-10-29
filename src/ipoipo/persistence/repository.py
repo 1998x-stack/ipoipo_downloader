@@ -56,23 +56,76 @@ class Repository:
                 self._event(c, "report_discovered", report.post_id, details_title=report.title)
             return old is None
 
+
+    def acquire_category_lease(self, category_id: str, owner: str, lease_seconds: int) -> bool:
+        """Atomic non-blocking claim; only one category producer at a time."""
+        if not owner or lease_seconds < 1:
+            raise ValueError("Invalid category lease request")
+        now = time.time()
+        with self.db.transaction() as c:
+            result = c.execute("""INSERT INTO category_leases(category_id,owner,lease_until,updated_at)
+                VALUES(?,?,?,?) ON CONFLICT(category_id) DO UPDATE SET
+                owner=excluded.owner,lease_until=excluded.lease_until,updated_at=excluded.updated_at
+                WHERE category_leases.lease_until<=?""",
+                (category_id, owner, now + lease_seconds, now, now))
+            if result.rowcount == 1:
+                self._event(c, "category_claimed", stage="discover",
+                            category_id=category_id, owner=owner)
+                return True
+            return False
+
+    def _assert_category_lease(self, c, category_id: str, owner: str) -> None:
+        row = c.execute("SELECT owner,lease_until FROM category_leases WHERE category_id=?",
+                        (category_id,)).fetchone()
+        if row is None or row["owner"] != owner or row["lease_until"] <= time.time():
+            raise RuntimeError("Category lease lost or expired")
+
+    def renew_category_lease(self, category_id: str, owner: str, lease_seconds: int) -> None:
+        if lease_seconds < 1:
+            raise ValueError("lease_seconds must be positive")
+        with self.db.transaction() as c:
+            self._assert_category_lease(c, category_id, owner)
+            now = time.time()
+            c.execute("UPDATE category_leases SET lease_until=?,updated_at=? WHERE category_id=?",
+                      (now + lease_seconds, now, category_id))
+
+    def release_category_lease(self, category_id: str, owner: str) -> bool:
+        with self.db.transaction() as c:
+            result = c.execute("DELETE FROM category_leases WHERE category_id=? AND owner=?",
+                               (category_id, owner))
+            if result.rowcount:
+                self._event(c, "category_released", stage="discover", category_id=category_id,
+                            owner=owner)
+            return bool(result.rowcount)
+
     def checkpoint(self, category_id: str) -> tuple[int, bool]:
         with self.db.lock:
             row = self.db.conn.execute("SELECT next_page,complete FROM crawl_checkpoints WHERE category_id=?",
                                        (category_id,)).fetchone()
         return (int(row["next_page"]), bool(row["complete"])) if row else (1, False)
 
-    def save_checkpoint(self, category_id: str, next_page: int, complete: bool = False) -> None:
+    def save_checkpoint(self, category_id: str, next_page: int, complete: bool = False, *, owner: str | None = None) -> None:
         if next_page < 1:
             raise ValueError("next_page must be >= 1")
         with self.db.transaction() as c:
+            if owner is not None:
+                self._assert_category_lease(c, category_id, owner)
             c.execute("""INSERT INTO crawl_checkpoints(category_id,next_page,complete,updated_at)
                 VALUES(?,?,?,?) ON CONFLICT(category_id) DO UPDATE SET
                 next_page=excluded.next_page,complete=excluded.complete,updated_at=excluded.updated_at""",
                 (category_id, next_page, int(complete), time.time()))
 
     def reset_checkpoints(self, category_id: str | None = None) -> None:
+        """Maintenance only: require no active producers on targeted categories."""
         with self.db.transaction() as c:
+            now = time.time()
+            if category_id is not None:
+                busy = c.execute("SELECT 1 FROM category_leases WHERE category_id=? AND lease_until>?",
+                                 (category_id, now)).fetchone()
+            else:
+                busy = c.execute("SELECT 1 FROM category_leases WHERE lease_until>?", (now,)).fetchone()
+            if busy:
+                raise RuntimeError("Cannot reset checkpoint while category is leased")
             if category_id:
                 c.execute("UPDATE crawl_checkpoints SET next_page=1,complete=0 WHERE category_id=?", (category_id,))
             else:
