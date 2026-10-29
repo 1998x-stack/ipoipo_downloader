@@ -5,9 +5,9 @@ Python >=3.11, src-layout package `ipoipo`. The v3 code is under `src/ipoipo/`; 
 ## Core commands
 
 ```bash
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[dev,legacy]"
 ruff check src/ipoipo --select E4,E7,E9,F
-python -m pytest tests/unit tests/integration tests/e2e tests/property -q
+python -m pytest tests -q
 python main.py --stage1 --data-dir /tmp/ipoipo-test
 python main.py --stats --data-dir /tmp/ipoipo-test
 ```
