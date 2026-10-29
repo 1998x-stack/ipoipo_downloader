@@ -34,3 +34,6 @@ select = ["E4", "E7", "E9", "F", "I"]
 include = ["src/ipoipo"]
 pythonVersion = "3.11"
 typeCheckingMode = "basic"
+
+[tool.setuptools.package-data]
+"ipoipo.persistence.migrations" = ["*.sql"]
