@@ -30,13 +30,15 @@ class Database:
             self.conn.execute("BEGIN IMMEDIATE")
             try:
                 if current_version == 0:
-                    sql = "\n".join(line for line in SCHEMA.splitlines()\n                                    if not line.lstrip().startswith("--"))
+                    sql = "\n".join(line for line in SCHEMA.splitlines()
+                                    if not line.lstrip().startswith("--"))
                     for statement in sql.split(";"):
                         if statement.strip():
                             self.conn.execute(statement)
                     self.conn.execute("PRAGMA user_version=1")
                 if current_version < 2:
-                    sql = "\n".join(line for line in SCHEMA_V2.splitlines()\n                                    if not line.lstrip().startswith("--"))
+                    sql = "\n".join(line for line in SCHEMA_V2.splitlines()
+                                    if not line.lstrip().startswith("--"))
                     for statement in sql.split(";"):
                         if statement.strip():
                             self.conn.execute(statement)
