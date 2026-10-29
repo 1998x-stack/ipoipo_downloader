@@ -8,6 +8,7 @@ import sys
 from ipoipo.observability.logging import configure_logging
 from ipoipo.persistence.event_log import export_events
 from ipoipo.persistence.legacy_import import import_legacy
+from ipoipo.pipeline.legacy_archive import migrate_archives
 from ipoipo.pipeline.runner import PipelineRunner
 from ipoipo.settings import Settings
 
@@ -32,6 +33,10 @@ def make_parser() -> argparse.ArgumentParser:
                    help="Opt-in call to ipify through the configured proxy")
     p.add_argument("--no-proxy", action="store_true")
     p.add_argument("--keep-zip", action="store_true")
+    p.add_argument("--extract", action="store_true",
+                   help="Safely import existing local ZIPs; original files are unchanged")
+    p.add_argument("--archive-dir", type=Path,
+                   help="Source ZIP directory; defaults to data/downloads")
     p.add_argument("--export-events", type=Path)
     p.add_argument("--import-legacy", action="store_true")
     p.add_argument("--verbose", action="store_true")
@@ -65,6 +70,12 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(result, ensure_ascii=False, indent=2))
         else:
             result = {}
+            if args.extract:
+                result["local_archive_import"] = migrate_archives(
+                    settings, runner.repository,
+                    args.archive_dir or args.data_dir / "downloads",
+                    category=args.category, limit=args.max_reports
+                )
             if args.import_legacy:
                 result["legacy_import"] = import_legacy(args.data_dir, runner.repository)
             if args.retry:
@@ -93,6 +104,8 @@ def main(argv: list[str] | None = None) -> int:
                 make_parser().print_help()
             else:
                 print(json.dumps(result, ensure_ascii=False, indent=2))
+                if result.get("local_archive_import", {}).get("failed", 0):
+                    return 1
         return 0
     except (ValueError, RuntimeError, OSError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

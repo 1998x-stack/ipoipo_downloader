@@ -254,6 +254,10 @@ class Repository:
         return {"categories": categories, "reports": reports, "artifacts": artifacts,
                 "tasks": {f"{r['stage']}:{r['status']}": r["n"] for r in tasks}}
 
+    def audit_event(self, kind: str, *, stage: str = "", **details: Any) -> None:
+        with self.db.transaction() as c:
+            self._event(c, kind, stage=stage, **details)
+
     def events(self, after_id: int = 0) -> list[dict[str, Any]]:
         with self.db.lock:
             rows = self.db.conn.execute("SELECT * FROM events WHERE id>? ORDER BY id", (after_id,)).fetchall()
